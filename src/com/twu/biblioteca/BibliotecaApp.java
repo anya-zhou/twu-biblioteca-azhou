@@ -5,22 +5,18 @@ import java.util.ArrayList;
 import java.util.ListResourceBundle;
 
 public class BibliotecaApp {
-    PrintStream printer;
-    Library library;
+    PrintStream printer = System.out;
+    Library library = new Library();;
     static final String WELCOME_MSG = "Welcome to Biblioteca. Your one-stop-shop for great book titles in Bangalore!";
 
     public BibliotecaApp() {
-        this.printer = System.out;
-        this.library = new Library();
     }
 
     public BibliotecaApp(PrintStream printer) {
-        this();
         this.printer = printer;
     }
 
     public BibliotecaApp(Library library) {
-        this();
         this.library = library;
     }
 
