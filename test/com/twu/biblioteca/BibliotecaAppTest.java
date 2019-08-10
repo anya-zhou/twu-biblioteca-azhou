@@ -54,9 +54,24 @@ public class BibliotecaAppTest {
         bibliotecaApp.listAllBooks();
 
         // Then
-        verify(mockOut, times(testBooks.size())).println(captor.capture());
-        for (int i = 0; i < testBooks.size(); i++) {
-            assertThat(captor.getAllValues().get(i), is(testBooks.get(i).toString()));
+        verify(mockOut, times(testBooks.size() + 1)).println(captor.capture());
+
+        for (int i = 0; i < testBooks.size() + 1; i++) {
+            String outLine = captor.getAllValues().get(i);
+            String[] bookDetails = outLine.split("\\s{2,}"); // Columns separated by 2+ spaces
+
+            if (i == 0) {
+                // Should print heading first
+                assertThat(bookDetails[0], is("Title"));
+                assertThat(bookDetails[1], is("Author"));
+                assertThat(bookDetails[2], is("Year Published"));
+            } else {
+                // Each subsequent printed line should contain title, author and year
+                Book bookToPrint = testBooks.get(i-1);
+                assertThat(bookDetails[0], is(bookToPrint.getTitle()));
+                assertThat(bookDetails[1], is(bookToPrint.getAuthorName()));
+                assertThat(bookDetails[2], is(bookToPrint.getYearPublished()));
+            }
         }
     }
 
