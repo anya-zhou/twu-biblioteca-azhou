@@ -1,13 +1,13 @@
 package com.twu.biblioteca;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.ListResourceBundle;
 
 public class BibliotecaApp {
     PrintStream printer = System.out;
-    Library library = new Library();;
+    Library library = new Library();
     static final String WELCOME_MSG = "Welcome to Biblioteca. Your one-stop-shop for great book titles in Bangalore!";
+    static final String COL_DIV = "  ";
+    static final int COL_WIDTH = 30;
 
     public BibliotecaApp() {
     }
@@ -31,9 +31,21 @@ public class BibliotecaApp {
     }
 
     public void listAllBooks() {
+        this.printer.println(this.getBookListHeader());
         for (Book book : this.library.getBooks()) {
-            this.printer.println(book.toString());
+            String bookString = formatToCol(book.getTitle());
+            bookString += formatToCol(book.getAuthorName());
+            bookString += formatToCol(book.getYearPublished());
+            this.printer.println(bookString);
         }
+    }
+
+    private String getBookListHeader() {
+        return formatToCol("Title") + formatToCol("Author") + formatToCol("Year Published");
+    }
+
+    private String formatToCol(String s) {
+        return String.format("%-" + COL_WIDTH + "s" + COL_DIV, s);
     }
 
     public static void main(String[] args) {

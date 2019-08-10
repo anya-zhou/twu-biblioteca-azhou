@@ -8,8 +8,8 @@ public class SampleAppData {
     public SampleAppData() {
         // Initialize some existing books in a library for test
         ArrayList<Book> testBooks = new ArrayList<Book>();
-        Book testBook1 = new Book("The Giver");
-        Book testBook2 = new Book("The Secret Garden");
+        Book testBook1 = new Book("The Giver", "Lois Lowry", "1993");
+        Book testBook2 = new Book("The Secret Garden", "Frances Hodgson Burnett", "1911");
         testBooks.add(testBook1);
         testBooks.add(testBook2);
         library = new Library(testBooks);
