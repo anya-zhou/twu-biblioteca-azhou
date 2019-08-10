@@ -11,20 +11,17 @@ import static org.mockito.Mockito.*;
 public class BibliotecaAppTest {
     private BibliotecaApp bibliotecaApp;
     private PrintStream mockOut;
-    private ArrayList<Book> testBooks = new ArrayList<Book>();
+    private ArrayList<Book> testBooks;
 
     @Before
     public void setUp() {
         //Given
         mockOut = mock(PrintStream.class);
+        SampleAppData sampleData = new SampleAppData();
 
-        // Initialize some existing books in a library for test
-        Book testBook1 = new Book("The Giver");
-        Book testBook2 = new Book("The Secret Garden");
-        testBooks.add(testBook1);
-        testBooks.add(testBook2);
-
-        bibliotecaApp = new BibliotecaApp(new Library(testBooks), mockOut);
+        // Populate library with some dummy books from SampleAppData
+        bibliotecaApp = new BibliotecaApp(sampleData.getLibrary(), mockOut);
+        testBooks = sampleData.getLibrary().getBooks();
     }
 
     @Test
@@ -44,6 +41,16 @@ public class BibliotecaAppTest {
         for (Book testBook : testBooks) {
             verify(mockOut).println(testBook.toString());
         }
+    }
+
+    @Test
+    public void testPrintNothingForEmptyLibrary() {
+        // Given - empty library as no library passed in through the constructor
+        bibliotecaApp = new BibliotecaApp(mockOut);
+        // When
+        bibliotecaApp.listAllBooks();
+        // Then
+        verify(mockOut, times(0)).println(any());
     }
 
     @Test
