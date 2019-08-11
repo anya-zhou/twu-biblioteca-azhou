@@ -15,11 +15,13 @@ public class BibliotecaApp {
     static final String WELCOME_MSG = "Welcome to Biblioteca. Your one-stop-shop for great book titles in Bangalore!";
     static final String COL_DIV = "  ";
     static final int COL_WIDTH = 30;
+    public static final String LIST_BOOKS_KEY = "1";
+    public static final String EXIT_APP_KEY = "2";
 
     static final Map<String, String> menu = new HashMap<String, String>() {
         {
-            put("1", "List of books");
-            put("2", "Exit the application");
+            put(LIST_BOOKS_KEY, "List of books");
+            put(EXIT_APP_KEY, "Exit the application");
         }
     };
 
@@ -69,10 +71,10 @@ public class BibliotecaApp {
         boolean optionExecuted = false;
         if (menu.containsKey(userInput)) {
             switch(userInput) {
-                case "1":
+                case LIST_BOOKS_KEY:
                     this.listAllBooks();
                     break;
-                case "2":
+                case EXIT_APP_KEY:
                     System.exit(0);
                     break;
             }

@@ -43,7 +43,7 @@ public class BibliotecaAppTest {
         // Given
         bibliotecaApp = new BibliotecaApp(mockOut, mockReader);
         sampleData = new SampleAppData();
-        when(mockReader.readLine()).thenReturn("1"); // Default user input when prompted is always "1"
+        when(mockReader.readLine()).thenReturn(BibliotecaApp.LIST_BOOKS_KEY); // Default user input when prompted is always BibliotecaApp.LIST_BOOKS_KEY
     }
 
     @Test
@@ -102,8 +102,8 @@ public class BibliotecaAppTest {
         // When
         bibliotecaApp.showMenu();
         //Then
-        verify(mockOut).println("1. List of books");
-        verify(mockOut).println("2. Exit the application");
+        verify(mockOut).println(BibliotecaApp.LIST_BOOKS_KEY + ". List of books");
+        verify(mockOut).println(BibliotecaApp.EXIT_APP_KEY + ". Exit the application");
         verify(mockOut).println("Please enter the number of the option that you would like to select: ");
     }
 
@@ -112,7 +112,7 @@ public class BibliotecaAppTest {
         // Given - mock selecting first option, see setUp
         BibliotecaApp spyApp = spy(bibliotecaApp);
         // When
-        spyApp.executeUserSelectedOption("1");
+        spyApp.executeUserSelectedOption(BibliotecaApp.LIST_BOOKS_KEY);
         // Then
         verify(spyApp).listAllBooks();
     }
@@ -130,10 +130,10 @@ public class BibliotecaAppTest {
 
     @Test
     public void testSelectListBooksOption() {
-        // Given - user select list book option "1" by default, see setUp
+        // Given - user select list book option BibliotecaApp.LIST_BOOKS_KEY by default, see setUp
         BibliotecaApp spyApp = spy(bibliotecaApp);
         // When
-        spyApp.executeUserSelectedOption("1");
+        spyApp.executeUserSelectedOption(BibliotecaApp.LIST_BOOKS_KEY);
         // Then
         verify(spyApp).listAllBooks();
     }
@@ -141,7 +141,7 @@ public class BibliotecaAppTest {
     @Test
     public void testGetNotifiedOnInvalidOption() throws IOException {
         // Given - one invalid selection before a valid one
-        when(mockReader.readLine()).thenReturn("100").thenReturn("1");
+        when(mockReader.readLine()).thenReturn("100").thenReturn(BibliotecaApp.LIST_BOOKS_KEY);
         // When
         bibliotecaApp.start(); // valid option does not include 100
         // Then - should notify user and prompt user for input one more time
@@ -152,7 +152,7 @@ public class BibliotecaAppTest {
     @Test
     public void testExitOption() throws IOException {
         // Given
-        when(mockReader.readLine()).thenReturn("2"); // Default user input when prompted is always "1"
+        when(mockReader.readLine()).thenReturn(BibliotecaApp.EXIT_APP_KEY);
         exit.expectSystemExit(); // Prevents System.exit from existing the JVM
         // When
         bibliotecaApp.start();
