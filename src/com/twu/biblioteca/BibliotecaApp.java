@@ -45,13 +45,19 @@ public class BibliotecaApp {
         this.showMenu();
 
         boolean optionExecuted = false;
-        while (!optionExecuted) {
-            optionExecuted = this.readAndExecuteMenuOption();
+        while (true) {
+           optionExecuted = this.readAndExecuteMenuOption();
+           if (optionExecuted) {
+               // Show user the menu again before prompting for input again
+               this.printer.println();
+               this.showMenu();
+           }
         }
     }
 
     public boolean readAndExecuteMenuOption() {
         try {
+            this.printer.print("Select option: ");
             String userInput = this.reader.readLine();
             return this.executeUserSelectedOption(userInput);
         } catch (IOException e) {
@@ -61,10 +67,10 @@ public class BibliotecaApp {
     }
 
     public void showMenu() {
+        this.printer.println("Please enter the number of the option that you would like to select: ");
         for (Map.Entry<String, String> menuOption : menu.entrySet()) {
             this.printer.println(menuOption.getKey() + ". " + menuOption.getValue());
         }
-        this.printer.println("Please enter the number of the option that you would like to select: ");
     }
 
     public boolean executeUserSelectedOption(String userInput) {
