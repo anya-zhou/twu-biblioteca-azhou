@@ -1,10 +1,15 @@
 package com.twu.biblioteca;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 
 public class BibliotecaApp {
     PrintStream printer = System.out;
+    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     Library library = new Library();
+
     static final String WELCOME_MSG = "Welcome to Biblioteca. Your one-stop-shop for great book titles in Bangalore!";
     static final String COL_DIV = "  ";
     static final int COL_WIDTH = 30;
@@ -12,22 +17,41 @@ public class BibliotecaApp {
     public BibliotecaApp() {
     }
 
-    public BibliotecaApp(PrintStream printer) {
+    public BibliotecaApp(PrintStream printer, BufferedReader reader) {
         this.printer = printer;
+        this.reader = reader;
     }
 
     public BibliotecaApp(Library library) {
         this.library = library;
     }
 
-    public BibliotecaApp(Library library, PrintStream printer) {
+    public BibliotecaApp(Library library, PrintStream printer, BufferedReader reader) {
         this.printer = printer;
+        this.reader = reader;
         this.library = library;
     }
 
     public void start() {
         this.printer.println(WELCOME_MSG);
-        this.listAllBooks();
+        this.showMenu();
+        this.getOptionNumberFromUser();
+    }
+
+    public void showMenu() {
+        this.printer.println("1. List of books");
+        this.printer.println("Please enter the number of the option that you would like to select: ");
+    }
+
+    public void getOptionNumberFromUser() {
+        try {
+            String userInput = this.reader.readLine();
+            if (userInput.equals("1")) {
+                this.listAllBooks();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void listAllBooks() {
