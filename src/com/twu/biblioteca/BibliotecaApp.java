@@ -19,11 +19,9 @@ public class BibliotecaApp {
     static final Map<String, String> menu = new HashMap<String, String>() {
         {
             put("1", "List of books");
+            put("2", "Exit the application");
         }
     };
-
-    public BibliotecaApp() {
-    }
 
     public BibliotecaApp(PrintStream printer, BufferedReader reader) {
         this.printer = printer;
@@ -43,11 +41,20 @@ public class BibliotecaApp {
     public void start() {
         this.printer.println(WELCOME_MSG);
         this.showMenu();
+
+        boolean optionExecuted = false;
+        while (!optionExecuted) {
+            optionExecuted = this.readAndExecuteMenuOption();
+        }
+    }
+
+    public boolean readAndExecuteMenuOption() {
         try {
             String userInput = this.reader.readLine();
-            this.executeUserSelectedOption(userInput);
+            return this.executeUserSelectedOption(userInput);
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
     }
 
@@ -58,15 +65,23 @@ public class BibliotecaApp {
         this.printer.println("Please enter the number of the option that you would like to select: ");
     }
 
-    public void executeUserSelectedOption(String userInput) {
+    public boolean executeUserSelectedOption(String userInput) {
+        boolean optionExecuted = false;
         if (menu.containsKey(userInput)) {
-            if (userInput.equals("1")) {
-                this.listAllBooks();
+            switch(userInput) {
+                case "1":
+                    this.listAllBooks();
+                    break;
+                case "2":
+                    System.exit(0);
+                    break;
             }
+            optionExecuted = true;
         } else {
             // Invalid menu option entered by user
             this.printer.println("Please select a valid option!");
         }
+        return optionExecuted;
     }
 
     public void listAllBooks() {
