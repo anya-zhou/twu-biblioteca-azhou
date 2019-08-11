@@ -121,4 +121,12 @@ public class BibliotecaAppTest {
         verify(spyApp).showMenu();
         verify(spyApp).executeUserSelectedOption("1");
     }
+
+    @Test
+    public void testGetNotifiedOnInvalidOption() {
+        // When
+        bibliotecaApp.executeUserSelectedOption("100"); // valid option does not include 100
+        // Then
+        verify(mockOut).println("Please select a valid option!");
+    }
 }

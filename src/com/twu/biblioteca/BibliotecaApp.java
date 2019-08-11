@@ -59,8 +59,13 @@ public class BibliotecaApp {
     }
 
     public void executeUserSelectedOption(String userInput) {
-        if (userInput.equals("1")) {
-            this.listAllBooks();
+        if (menu.containsKey(userInput)) {
+            if (userInput.equals("1")) {
+                this.listAllBooks();
+            }
+        } else {
+            // Invalid menu option entered by user
+            this.printer.println("Please select a valid option!");
         }
     }
 
