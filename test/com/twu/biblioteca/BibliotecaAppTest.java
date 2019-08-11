@@ -5,6 +5,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import static org.junit.Assert.assertThat;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
@@ -22,6 +24,9 @@ public class BibliotecaAppTest {
     @Mock
     PrintStream mockOut;
 
+    @Mock
+    BufferedReader mockReader;
+
     @Captor
     ArgumentCaptor<String> captor;
 
@@ -29,9 +34,11 @@ public class BibliotecaAppTest {
     private SampleAppData sampleData;
 
     @Before
-    public void setUp() {
-        bibliotecaApp = new BibliotecaApp(mockOut);
+    public void setUp() throws IOException {
+        // Given
+        bibliotecaApp = new BibliotecaApp(mockOut, mockReader);
         sampleData = new SampleAppData();
+        when(mockReader.readLine()).thenReturn("1"); // Default user input when prompted is always "1"
     }
 
     @Test
@@ -47,7 +54,7 @@ public class BibliotecaAppTest {
     @Test
     public void testListAllBooks() {
         // Given - populate library with some dummy books from SampleAppData
-        bibliotecaApp = new BibliotecaApp(sampleData.getLibrary(), mockOut);
+        bibliotecaApp = new BibliotecaApp(sampleData.getLibrary(), mockOut, mockReader);
         ArrayList<Book> testBooks = sampleData.getLibrary().getBooks();
 
         // When
@@ -78,7 +85,7 @@ public class BibliotecaAppTest {
     @Test
     public void testPrintNothingForEmptyLibrary() {
         // Given - empty library as no library passed in through the constructor
-        bibliotecaApp = new BibliotecaApp(mockOut);
+        bibliotecaApp = new BibliotecaApp(mockOut, mockReader);
         // When
         bibliotecaApp.listAllBooks();
         // Then
@@ -86,12 +93,31 @@ public class BibliotecaAppTest {
     }
 
     @Test
-    public void testListBooksOnStarting() {
+    public void testShowMenu() {
+        // When
+        bibliotecaApp.showMenu();
+        //Then
+        verify(mockOut).println("1. List of books");
+        verify(mockOut).println("Please enter the number of the option that you would like to select: ");
+    }
+
+    @Test
+    public void testSelectListBookMenuOption() {
+        // Given - mock selecting first option, see setUp
+        BibliotecaApp spyApp = spy(bibliotecaApp);
+        // When
+        spyApp.getOptionNumberFromUser();
+        // Then
+        verify(spyApp).listAllBooks();
+    }
+
+    @Test
+    public void testShowMenuAndGetSelectionOnStarting() {
         // Given
         BibliotecaApp spyApp = spy(bibliotecaApp);
         // When
         spyApp.start();
         // Then
-        verify(spyApp).listAllBooks();
+        verify(spyApp).showMenu();
     }
 }
