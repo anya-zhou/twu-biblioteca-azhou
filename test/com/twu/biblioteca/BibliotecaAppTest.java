@@ -119,14 +119,27 @@ public class BibliotecaAppTest {
         spyApp.start();
         // Then
         verify(spyApp).showMenu();
-        verify(spyApp).executeUserSelectedOption("1");
+        verify(spyApp).readAndExecuteMenuOption();
     }
 
     @Test
-    public void testGetNotifiedOnInvalidOption() {
+    public void testSelectListBooksOption() {
+        // Given - user select list book option "1" by default, see setUp
+        BibliotecaApp spyApp = spy(bibliotecaApp);
         // When
-        bibliotecaApp.executeUserSelectedOption("100"); // valid option does not include 100
+        spyApp.readAndExecuteMenuOption();
         // Then
+        verify(spyApp).listAllBooks();
+    }
+
+    @Test
+    public void testGetNotifiedOnInvalidOption() throws IOException {
+        // Given - one invalid selection before a valid one
+        when(mockReader.readLine()).thenReturn("100").thenReturn("1");
+        // When
+        bibliotecaApp.start(); // valid option does not include 100
+        // Then - should notify user and prompt user for input one more time
         verify(mockOut).println("Please select a valid option!");
+        verify(mockReader, times(2)).readLine();
     }
 }
