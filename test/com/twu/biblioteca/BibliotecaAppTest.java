@@ -106,7 +106,7 @@ public class BibliotecaAppTest {
         // Given - mock selecting first option, see setUp
         BibliotecaApp spyApp = spy(bibliotecaApp);
         // When
-        spyApp.getOptionNumberFromUser();
+        spyApp.executeUserSelectedOption("1");
         // Then
         verify(spyApp).listAllBooks();
     }
@@ -119,5 +119,6 @@ public class BibliotecaAppTest {
         spyApp.start();
         // Then
         verify(spyApp).showMenu();
+        verify(spyApp).executeUserSelectedOption("1");
     }
 }
