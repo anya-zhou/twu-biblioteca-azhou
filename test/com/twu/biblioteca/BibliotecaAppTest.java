@@ -89,7 +89,7 @@ public class BibliotecaAppTest {
         // When
         bibliotecaApp.listAllBooks();
         // Then
-        verify(mockOut, never()).println(any());
+        verify(mockOut, never()).println((String) any());
     }
 
     @Test
@@ -119,7 +119,7 @@ public class BibliotecaAppTest {
         spyApp.start();
         // Then
         verify(spyApp).showMenu();
-        verify(spyApp).readAndExecuteMenuOption();
+        verify(spyApp).executeUserSelectedOption((String) any());
     }
 
     @Test
@@ -127,7 +127,7 @@ public class BibliotecaAppTest {
         // Given - user select list book option "1" by default, see setUp
         BibliotecaApp spyApp = spy(bibliotecaApp);
         // When
-        spyApp.readAndExecuteMenuOption();
+        verify(spyApp).executeUserSelectedOption("1");
         // Then
         verify(spyApp).listAllBooks();
     }
