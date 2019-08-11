@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,12 +16,15 @@ public class BibliotecaApp {
     static final String WELCOME_MSG = "Welcome to Biblioteca. Your one-stop-shop for great book titles in Bangalore!";
     static final String COL_DIV = "  ";
     static final int COL_WIDTH = 30;
+    private static final int ID_COL_WIDTH = 5;
     public static final String LIST_BOOKS_KEY = "1";
-    public static final String EXIT_APP_KEY = "2";
+    public static final String CHECK_OUT_KEY = "2";
+    public static final String EXIT_APP_KEY = "3";
 
     static final Map<String, String> menu = new HashMap<String, String>() {
         {
             put(LIST_BOOKS_KEY, "List of books");
+            put(CHECK_OUT_KEY, "Check-out a book");
             put(EXIT_APP_KEY, "Exit the application");
         }
     };
@@ -80,6 +84,16 @@ public class BibliotecaApp {
                 case LIST_BOOKS_KEY:
                     this.listAllBooks();
                     break;
+                case CHECK_OUT_KEY:
+                    this.listAllBooks();
+                    try {
+                        this.printer.println("Please enter the ID of the book that you would like to check-out: ");
+                        String checkoutId = this.reader.readLine();
+                        this.checkoutBook(checkoutId);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    break;
                 case EXIT_APP_KEY:
                     System.exit(0);
                     break;
@@ -95,7 +109,8 @@ public class BibliotecaApp {
     public void listAllBooks() {
         this.printer.println(this.getBookListHeader());
         for (Book book : this.library.getBooks()) {
-            String bookString = formatToCol(book.getTitle());
+            String bookString = formatToCol(book.getId(), ID_COL_WIDTH);
+            bookString += formatToCol(book.getTitle());
             bookString += formatToCol(book.getAuthorName());
             bookString += formatToCol(book.getYearPublished());
             this.printer.println(bookString);
@@ -103,11 +118,24 @@ public class BibliotecaApp {
     }
 
     private String getBookListHeader() {
-        return formatToCol("Title") + formatToCol("Author") + formatToCol("Year Published");
+        String[] headerFields = new String[]{"Title", "Author", "Year Published"};
+        String header = formatToCol("ID", ID_COL_WIDTH);
+        for (String field : headerFields) {
+            header += formatToCol(field);
+        }
+        return header;
     }
 
     private String formatToCol(String s) {
         return String.format("%-" + COL_WIDTH + "s" + COL_DIV, s);
+    }
+
+    private String formatToCol(String s, int colWidth) {
+        return String.format("%-" + colWidth + "s" + COL_DIV, s);
+    }
+
+    public void checkoutBook(String checkoutBookId) {
+
     }
 
     public static void main(String[] args) {

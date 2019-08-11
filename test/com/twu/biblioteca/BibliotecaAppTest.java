@@ -16,6 +16,7 @@ import static org.mockito.Mockito.*;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -75,15 +76,17 @@ public class BibliotecaAppTest {
 
             if (i == 0) {
                 // Should print heading first
-                assertThat(bookDetails[0], is("Title"));
-                assertThat(bookDetails[1], is("Author"));
-                assertThat(bookDetails[2], is("Year Published"));
+                assertThat(bookDetails[0], is("ID"));
+                assertThat(bookDetails[1], is("Title"));
+                assertThat(bookDetails[2], is("Author"));
+                assertThat(bookDetails[3], is("Year Published"));
             } else {
                 // Each subsequent printed line should contain title, author and year
                 Book bookToPrint = testBooks.get(i-1);
-                assertThat(bookDetails[0], is(bookToPrint.getTitle()));
-                assertThat(bookDetails[1], is(bookToPrint.getAuthorName()));
-                assertThat(bookDetails[2], is(bookToPrint.getYearPublished()));
+                assertThat(bookDetails[0], is(bookToPrint.getId()));
+                assertThat(bookDetails[1], is(bookToPrint.getTitle()));
+                assertThat(bookDetails[2], is(bookToPrint.getAuthorName()));
+                assertThat(bookDetails[3], is(bookToPrint.getYearPublished()));
             }
         }
     }
@@ -95,7 +98,7 @@ public class BibliotecaAppTest {
         // When
         bibliotecaApp.listAllBooks();
         // Then - print header only
-        verify(mockOut, times(1)).println(startsWith("Title"));
+        verify(mockOut, times(1)).println(startsWith("ID"));
     }
 
     @Test
@@ -105,6 +108,7 @@ public class BibliotecaAppTest {
         //Then
         verify(mockOut).println("Please enter the number of the option that you would like to select: ");
         verify(mockOut).println(BibliotecaApp.LIST_BOOKS_KEY + ". List of books");
+        verify(mockOut).println(BibliotecaApp.CHECK_OUT_KEY + ". Check-out a book");
         verify(mockOut).println(BibliotecaApp.EXIT_APP_KEY + ". Exit the application");
     }
 
@@ -116,6 +120,36 @@ public class BibliotecaAppTest {
         spyApp.executeUserSelectedOption(BibliotecaApp.LIST_BOOKS_KEY);
         // Then
         verify(spyApp).listAllBooks();
+    }
+
+    @Test
+    public void testSelectCheckoutBookMenuOption() throws IOException {
+        // Given - mock selecting first option, see setUp
+        BibliotecaApp spyApp = spy(bibliotecaApp);
+        String checkoutBookId = sampleData.getLibrary().getBooks().get(0).getId();
+        when(mockReader.readLine()).thenReturn(checkoutBookId); // Attempt to checkout the first book on the list
+        // When
+        spyApp.executeUserSelectedOption(BibliotecaApp.CHECK_OUT_KEY);
+        // Then - list all books, prompt user to select which one to checkout, invoke checkout on selected book
+        verify(spyApp).listAllBooks();
+        verify(mockOut).println("Please enter the ID of the book that you would like to check-out: ");
+        verify(spyApp).checkoutBook(checkoutBookId);
+    }
+
+    @Test
+    public void testCheckedOutBookNoLongerListed() throws IOException {
+        // Given - mock selecting first option, see setUp
+        ArrayList<Book> testBooks = sampleData.getLibrary().getBooks();
+        String checkoutBookId = testBooks.get(0).getId();
+        // When
+        bibliotecaApp.checkoutBook(checkoutBookId);
+        bibliotecaApp.listAllBooks();
+        // Then
+        verify(mockOut).println(startsWith("ID"));
+        for (int i = 1; i < testBooks.size(); i++) {
+            verify(mockOut).println(startsWith(testBooks.get(i).getId()));
+        }
+        verifyNoMoreInteractions(mockOut);
     }
 
     @Test
