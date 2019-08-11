@@ -1,7 +1,9 @@
 package com.twu.biblioteca;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.junit.runner.RunWith;
 import static org.junit.Assert.assertThat;
 
@@ -29,6 +31,9 @@ public class BibliotecaAppTest {
 
     @Captor
     ArgumentCaptor<String> captor;
+
+    @Rule
+    public final ExpectedSystemExit exit = ExpectedSystemExit.none();
 
     private BibliotecaApp bibliotecaApp;
     private SampleAppData sampleData;
@@ -88,8 +93,8 @@ public class BibliotecaAppTest {
         bibliotecaApp = new BibliotecaApp(mockOut, mockReader);
         // When
         bibliotecaApp.listAllBooks();
-        // Then
-        verify(mockOut, never()).println((String) any());
+        // Then - print header only
+        verify(mockOut, times(1)).println(startsWith("Title"));
     }
 
     @Test
@@ -98,6 +103,7 @@ public class BibliotecaAppTest {
         bibliotecaApp.showMenu();
         //Then
         verify(mockOut).println("1. List of books");
+        verify(mockOut).println("2. Exit the application");
         verify(mockOut).println("Please enter the number of the option that you would like to select: ");
     }
 
@@ -127,7 +133,7 @@ public class BibliotecaAppTest {
         // Given - user select list book option "1" by default, see setUp
         BibliotecaApp spyApp = spy(bibliotecaApp);
         // When
-        verify(spyApp).executeUserSelectedOption("1");
+        spyApp.executeUserSelectedOption("1");
         // Then
         verify(spyApp).listAllBooks();
     }
@@ -141,5 +147,17 @@ public class BibliotecaAppTest {
         // Then - should notify user and prompt user for input one more time
         verify(mockOut).println("Please select a valid option!");
         verify(mockReader, times(2)).readLine();
+    }
+
+    @Test
+    public void testExitOption() throws IOException {
+        // Given
+        when(mockReader.readLine()).thenReturn("2"); // Default user input when prompted is always "1"
+        exit.expectSystemExit(); // Prevents System.exit from existing the JVM
+        // When
+        bibliotecaApp.start();
+        // Then - should not prompt for user input again
+        verify(mockReader, times(1)).readLine();
+        verifyNoMoreInteractions(mockReader);
     }
 }
