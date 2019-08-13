@@ -8,7 +8,7 @@ public class BookTest {
     @Test
     public void testToStringIsTitle() {
         String testTitle = "Test Title";
-        Book testBook = new Book(testTitle, "Test Author", "1923");
+        Book testBook = new Book("1", testTitle, "Test Author", "1923");
         assertThat(testBook.toString(), is(testTitle));
     }
 

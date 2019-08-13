@@ -5,14 +5,15 @@ public class Book {
     private String authorName;
     private String yearPublished;
     private String id;
-    static protected int nextId = 1;
 
-    public Book(String title, String authorName, String yearPublished) {
+    // Assumes that each book has an unique ID
+    // IRL ID could be something like a scan-able barcode, since it's very much possible for two different
+    // books to have the same title - this means user needs to use a different unique key to make selections
+    public Book(String id, String title, String authorName, String yearPublished) {
         this.title = title;
         this.authorName = authorName;
         this.yearPublished = yearPublished;
-        this.id = Integer.toString(nextId);
-        nextId += 1;
+        this.id = id;
     }
 
     public String getTitle() {

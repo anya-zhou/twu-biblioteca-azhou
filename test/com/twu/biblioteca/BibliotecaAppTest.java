@@ -146,7 +146,7 @@ public class BibliotecaAppTest {
         bibliotecaApp.listAllBooks();
         // Then
         verify(mockOut).println(startsWith("ID"));
-        for (int i = 1; i < testBooks.size(); i++) {
+        for (int i = 1; i < testBooks.size(); i++) {    // Should skip first book at 0 since it's checked out
             verify(mockOut).println(startsWith(testBooks.get(i).getId()));
         }
         verifyNoMoreInteractions(mockOut);
