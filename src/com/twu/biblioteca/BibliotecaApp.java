@@ -140,9 +140,11 @@ public class BibliotecaApp {
 
     public void checkoutBook(String checkoutBookId) {
         Book book = this.library.getBook(checkoutBookId);
-        if (book != null) {
+        if (book != null && book.isAvailable()) {
             book.checkOut();
             this.printer.println("Thank you! Enjoy the book");
+        } else {
+            this.printer.println("Sorry, that book is not available");
         }
     }
 
