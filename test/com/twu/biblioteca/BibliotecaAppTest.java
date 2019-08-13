@@ -124,7 +124,8 @@ public class BibliotecaAppTest {
 
     @Test
     public void testSelectCheckoutBookMenuOption() throws IOException {
-        // Given - mock selecting first option, see setUp
+        // Given
+        bibliotecaApp = new BibliotecaApp(sampleData.getLibrary(), mockOut, mockReader);
         BibliotecaApp spyApp = spy(bibliotecaApp);
         String checkoutBookId = sampleData.getLibrary().getBooks().get(0).getId();
         when(mockReader.readLine()).thenReturn(checkoutBookId); // Attempt to checkout the first book on the list
@@ -134,6 +135,18 @@ public class BibliotecaAppTest {
         verify(spyApp).listAllBooks();
         verify(mockOut).println("Please enter the ID of the book that you would like to check-out: ");
         verify(spyApp).checkoutBook(checkoutBookId);
+    }
+
+    @Test
+    public void testShowSuccessMessageOnCheckout() throws IOException {
+        // Given - attempt to checkout an existing book at index 0
+        bibliotecaApp = new BibliotecaApp(sampleData.getLibrary(), mockOut, mockReader);
+        ArrayList<Book> testBooks = sampleData.getLibrary().getBooks();
+        String checkoutBookId = testBooks.get(0).getId();
+        // When
+        bibliotecaApp.checkoutBook(checkoutBookId);
+        // Then
+        verify(mockOut).println("Thank you! Enjoy the book");
     }
 
     @Test
