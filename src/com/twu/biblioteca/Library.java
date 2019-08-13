@@ -1,6 +1,7 @@
 package com.twu.biblioteca;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class Library {
     private ArrayList<Book> books;
@@ -15,5 +16,18 @@ public class Library {
 
     public ArrayList<Book> getBooks() {
         return books;
+    }
+
+    public Book getBook(String bookId) {
+        for (Book book : this.books) {
+            if (book.getId().equals(bookId)) {
+                return book;
+            }
+        }
+        return null;
+    }
+
+    public ArrayList<Book> getAvailableBooks() {
+        return (ArrayList<Book>) this.books.stream().filter(book -> book.isAvailable()).collect(Collectors.toList());
     }
 }

@@ -138,18 +138,20 @@ public class BibliotecaAppTest {
 
     @Test
     public void testCheckedOutBookNoLongerListed() throws IOException {
-        // Given - mock selecting first option, see setUp
+        // Given - attempt to checkout an existing book at index 0
+        bibliotecaApp = new BibliotecaApp(sampleData.getLibrary(), mockOut, mockReader);
         ArrayList<Book> testBooks = sampleData.getLibrary().getBooks();
         String checkoutBookId = testBooks.get(0).getId();
         // When
         bibliotecaApp.checkoutBook(checkoutBookId);
         bibliotecaApp.listAllBooks();
         // Then
+        assertThat(bibliotecaApp.getLibrary().getAvailableBooks().contains(testBooks.get(0)), is(false));
+
         verify(mockOut).println(startsWith("ID"));
         for (int i = 1; i < testBooks.size(); i++) {    // Should skip first book at 0 since it's checked out
             verify(mockOut).println(startsWith(testBooks.get(i).getId()));
         }
-        verifyNoMoreInteractions(mockOut);
     }
 
     @Test

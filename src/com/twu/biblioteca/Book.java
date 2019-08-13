@@ -5,6 +5,7 @@ public class Book {
     private String authorName;
     private String yearPublished;
     private String id;
+    private boolean isAvailable;
 
     // Assumes that each book has an unique ID
     // IRL ID could be something like a scan-able barcode, since it's very much possible for two different
@@ -14,6 +15,7 @@ public class Book {
         this.authorName = authorName;
         this.yearPublished = yearPublished;
         this.id = id;
+        this.isAvailable = true;
     }
 
     public String getTitle() {
@@ -30,6 +32,14 @@ public class Book {
 
     public String getId() {
         return this.id;
+    }
+
+    public boolean isAvailable() {
+        return this.isAvailable;
+    }
+
+    public void checkOut() {
+        this.isAvailable = false;
     }
 
     @Override

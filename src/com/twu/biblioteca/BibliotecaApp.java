@@ -9,9 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BibliotecaApp {
-    PrintStream printer = System.out;
-    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-    Library library = new Library();
+    private PrintStream printer = System.out;
+    private BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+    private Library library = new Library();
 
     static final String WELCOME_MSG = "Welcome to Biblioteca. Your one-stop-shop for great book titles in Bangalore!";
     static final String COL_DIV = "  ";
@@ -42,6 +42,10 @@ public class BibliotecaApp {
         this.printer = printer;
         this.reader = reader;
         this.library = library;
+    }
+
+    public Library getLibrary() {
+        return library;
     }
 
     public void start() {
@@ -108,7 +112,7 @@ public class BibliotecaApp {
 
     public void listAllBooks() {
         this.printer.println(this.getBookListHeader());
-        for (Book book : this.library.getBooks()) {
+        for (Book book : this.library.getAvailableBooks()) {
             String bookString = formatToCol(book.getId(), ID_COL_WIDTH);
             bookString += formatToCol(book.getTitle());
             bookString += formatToCol(book.getAuthorName());
@@ -135,7 +139,10 @@ public class BibliotecaApp {
     }
 
     public void checkoutBook(String checkoutBookId) {
-
+        Book book = this.library.getBook(checkoutBookId);
+        if (book != null) {
+            book.checkOut();
+        }
     }
 
     public static void main(String[] args) {
