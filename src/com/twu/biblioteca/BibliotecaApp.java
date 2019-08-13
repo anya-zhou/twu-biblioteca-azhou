@@ -160,8 +160,8 @@ public class BibliotecaApp {
         return String.format("%-" + colWidth + "s" + COL_DIV, s);
     }
 
-    public void checkoutBook(String checkoutBookId) {
-        Book book = this.library.getBook(checkoutBookId);
+    public void checkoutBook(String bookId) {
+        Book book = this.library.getBook(bookId);
         if (book != null && book.isAvailable()) {
             book.checkOut();
             this.printer.println("Thank you! Enjoy the book");
@@ -170,7 +170,11 @@ public class BibliotecaApp {
         }
     }
 
-    public void returnBook(String id) {
+    public void returnBook(String bookId) {
+        Book book = this.library.getBook(bookId);
+        if (book != null) {
+            book.returning();
+        }
     }
 
     public static void main(String[] args) {

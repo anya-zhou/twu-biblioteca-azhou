@@ -42,6 +42,10 @@ public class Book {
         this.isAvailable = false;
     }
 
+    public void returning() {
+        this.isAvailable = true;
+    }
+
     @Override
     public String toString() {
         return this.title;

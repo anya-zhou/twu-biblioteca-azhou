@@ -23,4 +23,14 @@ public class BookTest {
         assertThat(testBook.isAvailable(), is(false));
     }
 
+    @Test
+    public void testReturn() {
+        //Given - initially checked out book
+        Book testBook = new Book("1", "Test Title", "Test Author", "1923");
+        testBook.checkOut();
+        //When
+        testBook.returning();
+        //Then
+        assertThat(testBook.isAvailable(), is(true));
+    }
 }

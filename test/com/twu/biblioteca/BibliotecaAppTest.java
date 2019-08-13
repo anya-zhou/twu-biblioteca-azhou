@@ -192,21 +192,6 @@ public class BibliotecaAppTest {
     }
 
     @Test
-    public void testSelectReturnBookMenuOption() throws IOException {
-        // Given
-        bibliotecaApp = new BibliotecaApp(sampleData.getLibrary(), mockOut, mockReader);
-        BibliotecaApp spyApp = spy(bibliotecaApp);
-        Book checkedOutBook = sampleData.getLibrary().getBooks().get(0);
-        checkedOutBook.checkOut();  // ensure it's checked out
-        when(mockReader.readLine()).thenReturn(checkedOutBook.getId()); // Attempt to return that book when prompted
-        // When
-        spyApp.executeUserSelectedOption(BibliotecaApp.RETURN_KEY);
-        // Then - prompt user to select which one to return, invoke return
-        verify(mockOut).println("Please enter the ID of the book that you would like to return: ");
-        verify(spyApp).returnBook(checkedOutBook.getId());
-    }
-
-    @Test
     public void testReturnBooksOption() {
         // Given
         BibliotecaApp spyApp = spy(bibliotecaApp);
@@ -216,7 +201,36 @@ public class BibliotecaAppTest {
         verify(spyApp).initiateReturn();
     }
 
+    @Test
+    public void testSelectReturnBookMenuOption() throws IOException {
+        // Given
+        bibliotecaApp = new BibliotecaApp(sampleData.getLibrary(), mockOut, mockReader);
+        BibliotecaApp spyApp = spy(bibliotecaApp);
+        Book checkedOutBook = sampleData.getLibrary().getBooks().get(0);
+        checkedOutBook.checkOut();  // ensure it's checked out
+        when(mockReader.readLine()).thenReturn(checkedOutBook.getId()); // Attempt to return that book when prompted
+        // When
+        spyApp.initiateReturn();
+        // Then - prompt user to select which one to return, invoke return
+        verify(mockOut).println("Please enter the ID of the book that you would like to return: ");
+        verify(spyApp).returnBook(checkedOutBook.getId());
+    }
 
+    @Test
+    public void testSuccessfulReturn() throws IOException {
+        // Given - attempt to return a checked out book
+        bibliotecaApp = new BibliotecaApp(sampleData.getLibrary(), mockOut, mockReader);
+        ArrayList<Book> testBooks = sampleData.getLibrary().getBooks();
+        Book checkoutBook = testBooks.get(0);
+        checkoutBook.checkOut();    // ensure it's checked out
+
+        // When
+        bibliotecaApp.returnBook(checkoutBook.getId());
+        bibliotecaApp.listAllBooks();
+        // Then
+        // 1. Returned book should show in the list
+        verify(mockOut).println(startsWith(checkoutBook.getId()));
+    }
 
     @Test
     public void testGetNotifiedOnInvalidOption() throws IOException {
