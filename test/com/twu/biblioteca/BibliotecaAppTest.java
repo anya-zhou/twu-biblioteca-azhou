@@ -235,6 +235,16 @@ public class BibliotecaAppTest {
     }
 
     @Test
+    public void testUnsuccessfulReturnNoSuchBook() throws IOException {
+        // Given - attempt to checkout an book that never existed in the library
+        bibliotecaApp = new BibliotecaApp(sampleData.getLibrary(), mockOut, mockReader);
+        // When
+        bibliotecaApp.returnBook("Bad ID");
+        // Then
+        verify(mockOut).println("That is not a valid book to return.");
+    }
+
+    @Test
     public void testGetNotifiedOnInvalidOption() throws IOException {
         // Given - one invalid selection before a valid one
         when(mockReader.readLine()).thenReturn("100").thenReturn(BibliotecaApp.EXIT_APP_KEY);

@@ -175,6 +175,8 @@ public class BibliotecaApp {
         if (book != null) {
             book.returning();
             this.printer.println("Thank you for returning the book");
+        } else {
+            this.printer.println("That is not a valid book to return.");
         }
     }
 
