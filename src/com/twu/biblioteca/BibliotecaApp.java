@@ -142,6 +142,7 @@ public class BibliotecaApp {
         Book book = this.library.getBook(checkoutBookId);
         if (book != null) {
             book.checkOut();
+            this.printer.println("Thank you! Enjoy the book");
         }
     }
 
