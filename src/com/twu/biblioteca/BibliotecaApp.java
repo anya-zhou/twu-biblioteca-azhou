@@ -174,6 +174,7 @@ public class BibliotecaApp {
         Book book = this.library.getBook(bookId);
         if (book != null) {
             book.returning();
+            this.printer.println("Thank you for returning the book");
         }
     }
 

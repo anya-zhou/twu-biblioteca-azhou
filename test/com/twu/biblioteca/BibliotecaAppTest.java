@@ -229,7 +229,9 @@ public class BibliotecaAppTest {
         bibliotecaApp.listAllBooks();
         // Then
         // 1. Returned book should show in the list
+        // 2. Should show success message
         verify(mockOut).println(startsWith(checkoutBook.getId()));
+        verify(mockOut).println("Thank you for returning the book");
     }
 
     @Test
