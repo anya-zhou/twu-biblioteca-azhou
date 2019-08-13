@@ -109,12 +109,13 @@ public class BibliotecaAppTest {
         verify(mockOut).println("Please enter the number of the option that you would like to select: ");
         verify(mockOut).println(BibliotecaApp.LIST_BOOKS_KEY + ". List of books");
         verify(mockOut).println(BibliotecaApp.CHECK_OUT_KEY + ". Check-out a book");
+        verify(mockOut).println(BibliotecaApp.RETURN_KEY + ". Return a book");
         verify(mockOut).println(BibliotecaApp.EXIT_APP_KEY + ". Exit the application");
     }
 
     @Test
     public void testSelectListBookMenuOption() {
-        // Given - mock selecting first option, see setUp
+        // Given
         BibliotecaApp spyApp = spy(bibliotecaApp);
         // When
         spyApp.executeUserSelectedOption(BibliotecaApp.LIST_BOOKS_KEY);
@@ -192,14 +193,31 @@ public class BibliotecaAppTest {
     }
 
     @Test
-    public void testSelectListBooksOption() {
+    public void testSelectReturnBookMenuOption() throws IOException {
+        // Given
+        bibliotecaApp = new BibliotecaApp(sampleData.getLibrary(), mockOut, mockReader);
+        BibliotecaApp spyApp = spy(bibliotecaApp);
+        Book checkedOutBook = sampleData.getLibrary().getBooks().get(0);
+        checkedOutBook.checkOut();  // ensure it's checked out
+        when(mockReader.readLine()).thenReturn(checkedOutBook.getId()); // Attempt to return that book when prompted
+        // When
+        spyApp.executeUserSelectedOption(BibliotecaApp.RETURN_KEY);
+        // Then - prompt user to select which one to return, invoke return
+        verify(mockOut).println("Please enter the ID of the book that you would like to return: ");
+        verify(spyApp).returnBook(checkedOutBook.getId());
+    }
+
+    @Test
+    public void testReturnBooksOption() {
         // Given
         BibliotecaApp spyApp = spy(bibliotecaApp);
         // When
-        spyApp.executeUserSelectedOption(BibliotecaApp.LIST_BOOKS_KEY);
+        spyApp.executeUserSelectedOption(BibliotecaApp.RETURN_KEY);
         // Then
-        verify(spyApp).listAllBooks();
+        verify(spyApp).initiateReturn();
     }
+
+
 
     @Test
     public void testGetNotifiedOnInvalidOption() throws IOException {
