@@ -138,19 +138,7 @@ public class BibliotecaAppTest {
     }
 
     @Test
-    public void testShowSuccessMessageOnCheckout() throws IOException {
-        // Given - attempt to checkout an existing book at index 0
-        bibliotecaApp = new BibliotecaApp(sampleData.getLibrary(), mockOut, mockReader);
-        ArrayList<Book> testBooks = sampleData.getLibrary().getBooks();
-        String checkoutBookId = testBooks.get(0).getId();
-        // When
-        bibliotecaApp.checkoutBook(checkoutBookId);
-        // Then
-        verify(mockOut).println("Thank you! Enjoy the book");
-    }
-
-    @Test
-    public void testCheckedOutBookNoLongerListed() throws IOException {
+    public void testSuccessfulCheckout() throws IOException {
         // Given - attempt to checkout an existing book at index 0
         bibliotecaApp = new BibliotecaApp(sampleData.getLibrary(), mockOut, mockReader);
         ArrayList<Book> testBooks = sampleData.getLibrary().getBooks();
@@ -159,8 +147,9 @@ public class BibliotecaAppTest {
         bibliotecaApp.checkoutBook(checkoutBookId);
         bibliotecaApp.listAllBooks();
         // Then
-        assertThat(bibliotecaApp.getLibrary().getAvailableBooks().contains(testBooks.get(0)), is(false));
-
+        // 1. Should show success message
+        // 2. Checked out book should NOT be listed after
+        verify(mockOut).println("Thank you! Enjoy the book");
         verify(mockOut).println(startsWith("ID"));
         for (int i = 1; i < testBooks.size(); i++) {    // Should skip first book at 0 since it's checked out
             verify(mockOut).println(startsWith(testBooks.get(i).getId()));
