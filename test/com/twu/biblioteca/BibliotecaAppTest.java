@@ -157,6 +157,29 @@ public class BibliotecaAppTest {
     }
 
     @Test
+    public void testUnsuccessfulCheckoutNoSuchBook() throws IOException {
+        // Given - attempt to checkout an book that never existed in the library
+        bibliotecaApp = new BibliotecaApp(sampleData.getLibrary(), mockOut, mockReader);
+        // When
+        bibliotecaApp.checkoutBook("Bad ID");
+        // Then
+        verify(mockOut).println("Sorry, that book is not available");
+    }
+
+    @Test
+    public void testUnsuccessfulCheckoutAlreadyCheckedOut() throws IOException {
+        // Given - attempt to checkout an book that was already checked out
+        bibliotecaApp = new BibliotecaApp(sampleData.getLibrary(), mockOut, mockReader);
+        Book testCheckoutBook = sampleData.getLibrary().getBooks().get(0);
+        testCheckoutBook.checkOut();  // ensure it's already checked out
+
+        // When
+        bibliotecaApp.checkoutBook(testCheckoutBook.getId());
+        // Then
+        verify(mockOut).println("Sorry, that book is not available");
+    }
+
+    @Test
     public void testShowMenuAndGetSelectionOnStarting() {
         // Given
         BibliotecaApp spyApp = spy(bibliotecaApp);
