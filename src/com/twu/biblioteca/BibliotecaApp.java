@@ -90,13 +90,7 @@ public class BibliotecaApp {
                     break;
                 case CHECK_OUT_KEY:
                     this.listAllBooks();
-                    try {
-                        this.printer.println("Please enter the ID of the book that you would like to check-out: ");
-                        String checkoutId = this.reader.readLine();
-                        this.checkoutBook(checkoutId);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    this.initiateCheckOut();
                     break;
                 case EXIT_APP_KEY:
                     System.exit(0);
@@ -108,6 +102,18 @@ public class BibliotecaApp {
             this.printer.println("Please select a valid option!");
         }
         return optionExecuted;
+    }
+
+    // Assumes unsuccessful failure returns user to the main menu, if checkout sub-process should be
+    // repeated then this method requires additional while loop
+    public void initiateCheckOut() {
+        try {
+            this.printer.println("Please enter the ID of the book that you would like to check-out: ");
+            String checkoutId = this.reader.readLine();
+            this.checkoutBook(checkoutId);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void listAllBooks() {
