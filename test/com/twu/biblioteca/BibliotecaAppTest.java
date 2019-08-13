@@ -133,7 +133,6 @@ public class BibliotecaAppTest {
         // When
         spyApp.executeUserSelectedOption(BibliotecaApp.CHECK_OUT_KEY);
         // Then - list all books, prompt user to select which one to checkout, invoke checkout on selected book
-        verify(spyApp).listAllBooks();
         verify(mockOut).println("Please enter the ID of the book that you would like to check-out: ");
         verify(spyApp).checkoutBook(checkoutBookId);
     }

@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,12 +18,14 @@ public class BibliotecaApp {
     private static final int ID_COL_WIDTH = 5;
     public static final String LIST_BOOKS_KEY = "1";
     public static final String CHECK_OUT_KEY = "2";
-    public static final String EXIT_APP_KEY = "3";
+    public static final String RETURN_KEY = "3";
+    public static final String EXIT_APP_KEY = "4";
 
     static final Map<String, String> menu = new HashMap<String, String>() {
         {
             put(LIST_BOOKS_KEY, "List of books");
             put(CHECK_OUT_KEY, "Check-out a book");
+            put(RETURN_KEY, "Return a book");
             put(EXIT_APP_KEY, "Exit the application");
         }
     };
@@ -89,8 +90,10 @@ public class BibliotecaApp {
                     this.listAllBooks();
                     break;
                 case CHECK_OUT_KEY:
-                    this.listAllBooks();
                     this.initiateCheckOut();
+                    break;
+                case RETURN_KEY:
+                    this.initiateReturn();
                     break;
                 case EXIT_APP_KEY:
                     System.exit(0);
@@ -107,13 +110,26 @@ public class BibliotecaApp {
     // Assumes unsuccessful failure returns user to the main menu, if checkout sub-process should be
     // repeated then this method requires additional while loop
     public void initiateCheckOut() {
+        String bookId = getBookIdFromUser("check-out");
+        this.checkoutBook(bookId);
+    }
+
+    private String getBookIdFromUser(String userAction) {
         try {
-            this.printer.println("Please enter the ID of the book that you would like to check-out: ");
-            String checkoutId = this.reader.readLine();
-            this.checkoutBook(checkoutId);
+            this.printer.println(
+                "Please enter the ID of the book that you would like to " + userAction + ": "
+            );
+            String bookId = this.reader.readLine();
+            return bookId;
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
+    }
+
+    public void initiateReturn() {
+        String bookId = getBookIdFromUser("return");
+        this.returnBook(bookId);
     }
 
     public void listAllBooks() {
@@ -152,6 +168,9 @@ public class BibliotecaApp {
         } else {
             this.printer.println("Sorry, that book is not available");
         }
+    }
+
+    public void returnBook(String id) {
     }
 
     public static void main(String[] args) {
