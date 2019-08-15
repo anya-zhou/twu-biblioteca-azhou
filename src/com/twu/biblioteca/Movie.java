@@ -57,6 +57,11 @@ public class Movie extends LibraryItem {
         return fieldStrings;
     }
 
+    @Override
+    public String getDescription() {
+        return "movie";
+    }
+
     public String getName() {
         return name;
     }

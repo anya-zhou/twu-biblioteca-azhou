@@ -48,4 +48,9 @@ public class Book extends LibraryItem{
         fieldStrings.add(this.getYearPublished());
         return fieldStrings;
     }
+
+    @Override
+    public String getDescription() {
+        return "book";
+    }
 }

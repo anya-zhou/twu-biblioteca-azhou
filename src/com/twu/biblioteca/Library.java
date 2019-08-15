@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 public class Library<T extends LibraryItem> {
     private ArrayList<T> items;
     private ArrayList<String> headers = new ArrayList<>();
+    private String itemDescription;
 
     public Library() {
         this.items = new ArrayList<T>();
@@ -14,6 +15,7 @@ public class Library<T extends LibraryItem> {
     public Library(ArrayList<T> items) {
         this.items = items;
         if (items.size() > 0) {
+            itemDescription = items.get(0).getDescription();
             headers = items.get(0).getPrintableHeaders();
         }
     }
@@ -37,5 +39,9 @@ public class Library<T extends LibraryItem> {
 
     public ArrayList<String> getHeaderStrings() {
         return headers;
+    }
+
+    public String getItemDescription() {
+        return itemDescription;
     }
 }

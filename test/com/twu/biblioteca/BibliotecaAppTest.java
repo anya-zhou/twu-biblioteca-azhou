@@ -174,7 +174,7 @@ public class BibliotecaAppTest {
         // 1. Should show success message
         // 2. Checked out book should NOT be listed after
         verify(mockOut).println("Thank you! Enjoy the book");
-        
+
         for (int i = 1; i < testBooks.size(); i++) {    // Should skip first book at 0 since it's checked out
             verifyPrintIgnoreTrailingBlanks(testBooks.get(i).getTitle());
         }

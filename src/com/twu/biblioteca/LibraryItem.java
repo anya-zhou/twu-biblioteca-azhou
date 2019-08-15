@@ -32,4 +32,6 @@ public abstract class LibraryItem {
     public abstract ArrayList<String> getPrintableHeaders();
 
     public abstract ArrayList<String> getPrintableFieldStrings();
+
+    public abstract String getDescription();
 }

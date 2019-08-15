@@ -22,7 +22,8 @@ public class BibliotecaApp {
     public static final String CHECK_OUT_BOOK_KEY = "2";
     public static final String RETURN_BOOK_KEY = "3";
     public static final String LIST_MOVIES_KEY = "4";
-    public static final String EXIT_APP_KEY = "5";
+    public static final String CHECK_OUT_MOVIE_KEY = "5";
+    public static final String EXIT_APP_KEY = "6";
 
     static final Map<String, String> menu = new HashMap<String, String>() {
         {
@@ -30,6 +31,7 @@ public class BibliotecaApp {
             put(CHECK_OUT_BOOK_KEY, "Check-out a book");
             put(RETURN_BOOK_KEY, "Return a book");
             put(LIST_MOVIES_KEY, "List of movies");
+            put(CHECK_OUT_MOVIE_KEY, "Check-out a movie");
             put(EXIT_APP_KEY, "Exit the application");
         }
     };
@@ -103,23 +105,29 @@ public class BibliotecaApp {
         boolean optionExecuted = false;
         if (menu.containsKey(userInput)) {
             switch(userInput) {
+                // Assumes unsuccessful action returns user to the main menu, if checkout sub-process should be
+                // repeated then this method requires additional while loop
                 case LIST_BOOKS_KEY:
                     this.listAvailableBooks();
                     break;
                 case CHECK_OUT_BOOK_KEY:
-                    this.initiateCheckOut();
+                    this.initiateBookCheckout();
                     break;
                 case RETURN_BOOK_KEY:
-                    this.initiateReturn();
+                    this.initiateBookReturn();
                     break;
                 case LIST_MOVIES_KEY:
-                    this.listAvailableItems(movieLibrary);
+                    this.listAvailableMovies();
+                    break;
+                case CHECK_OUT_MOVIE_KEY:
+                    this.initiateMovieCheckout();
                     break;
                 case EXIT_APP_KEY:
                     System.exit(0);
                     break;
             }
             optionExecuted = true;
+
         } else {
             // Invalid menu option entered by user
             this.printer.println("Please select a valid option!");
@@ -127,17 +135,28 @@ public class BibliotecaApp {
         return optionExecuted;
     }
 
-    // Assumes unsuccessful failure returns user to the main menu, if checkout sub-process should be
-    // repeated then this method requires additional while loop
-    public void initiateCheckOut() {
-        String bookId = getBookIdFromUser("check-out");
-        this.checkoutBook(bookId);
+    public void listAvailableBooks() {
+        this.listAvailableItems(this.bookLibrary);
     }
 
-    private String getBookIdFromUser(String userAction) {
+    public void listAvailableMovies() {
+        this.listAvailableItems(movieLibrary);
+    }
+
+    public void initiateBookCheckout() {
+        String itemId = getItemIdFromUser("check-out", bookLibrary.getItemDescription());
+        this.checkoutBook(itemId);
+    }
+
+    public void initiateMovieCheckout() {
+        String itemId = getItemIdFromUser("check-out", movieLibrary.getItemDescription());
+        this.checkoutMovie(itemId);
+    }
+
+    private String getItemIdFromUser(String userAction, String itemDescription) {
         try {
             this.printer.println(
-                "Please enter the ID of the book that you would like to " + userAction + ": "
+                "Please enter the ID of the " + itemDescription + " that you would like to " + userAction + ": "
             );
             String bookId = this.reader.readLine();
             return bookId;
@@ -147,8 +166,12 @@ public class BibliotecaApp {
         }
     }
 
-    public void initiateReturn() {
-        String bookId = getBookIdFromUser("return");
+    public void initiateBookReturn() {
+        this.initiateReturn(bookLibrary);
+    }
+
+    public void initiateReturn(Library library) {
+        String bookId = getItemIdFromUser("return", library.getItemDescription());
         this.returnBook(bookId);
     }
 
@@ -162,10 +185,6 @@ public class BibliotecaApp {
         }
     }
 
-    public void listAvailableBooks() {
-        this.listAvailableItems(this.bookLibrary);
-    }
-
     private void printFieldStringsAsLine(ArrayList<String> fieldStrings) {
         for (String fieldString : fieldStrings) {
             this.printer.print(formatToCol(fieldString, COL_WIDTH));
@@ -173,21 +192,25 @@ public class BibliotecaApp {
         this.printer.println();
     }
 
-    private String formatToCol(String s) {
-        return String.format("%-" + COL_WIDTH + "s" + COL_DIV, s);
-    }
-
     private String formatToCol(String s, int colWidth) {
         return String.format("%-" + colWidth + "s" + COL_DIV, s);
     }
 
     public void checkoutBook(String bookId) {
-        Book book = this.bookLibrary.getItem(bookId);
-        if (book != null && book.isAvailable()) {
-            book.checkOut();
-            this.printer.println("Thank you! Enjoy the book");
+        this.checkout(bookId, bookLibrary);
+    }
+
+    public void checkoutMovie(String movieId) {
+        this.checkout(movieId, movieLibrary);
+    }
+
+    public void checkout(String itemId, Library library) {
+        LibraryItem item = library.getItem(itemId);
+        if (item != null && item.isAvailable()) {
+            item.checkOut();
+            this.printer.println("Thank you! Enjoy the " + library.getItemDescription());
         } else {
-            this.printer.println("Sorry, that book is not available");
+            this.printer.println("Sorry, that " + library.getItemDescription() + " is not available");
         }
     }
 
