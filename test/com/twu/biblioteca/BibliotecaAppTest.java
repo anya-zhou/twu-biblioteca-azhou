@@ -7,7 +7,6 @@ import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.junit.runner.RunWith;
 
 import static org.hamcrest.CoreMatchers.anyOf;
-import static org.hamcrest.Matchers.either;
 import static org.junit.Assert.assertThat;
 
 import java.io.BufferedReader;
@@ -97,7 +96,8 @@ public class BibliotecaAppTest {
     }
 
     private void verifyPrintIgnoreTrailingBlanks(String s) {
-        verify(mockOut).print(startsWith(s));
+        verify(mockOut, atLeastOnce()).print(captor.capture());
+        assertThat(captor.getAllValues(), hasItem(containsString(s)));
     }
 
     @Test
@@ -148,7 +148,21 @@ public class BibliotecaAppTest {
     }
 
     @Test
-    public void testSuccessfulCheckout() throws IOException {
+    public void testSelectCheckoutMovieMenuOption() throws IOException {
+        // Given
+        bibliotecaApp = new BibliotecaApp(sampleData.getBookLibrary(), sampleData.getMovieLibrary(), mockOut, mockReader);
+        BibliotecaApp spyApp = spy(bibliotecaApp);
+        String checkoutMovieId = sampleData.getMovieLibrary().getItems().get(0).getId();
+        when(mockReader.readLine()).thenReturn(checkoutMovieId); // Attempt to checkout the first book on the list
+        // When
+        spyApp.executeUserSelectedOption(BibliotecaApp.CHECK_OUT_MOVIE_KEY);
+        // Then - list all books, prompt user to select which one to checkout, invoke checkout on selected book
+        verify(mockOut).println("Please enter the ID of the movie that you would like to check-out: ");
+        verify(spyApp).checkoutMovie(checkoutMovieId);
+    }
+
+    @Test
+    public void testSuccessfulCheckoutBook() throws IOException {
         // Given - attempt to checkout an existing book at index 0
         bibliotecaApp = new BibliotecaApp(sampleData.getBookLibrary(), mockOut, mockReader);
         ArrayList<Book> testBooks = sampleData.getBookLibrary().getItems();
@@ -160,9 +174,9 @@ public class BibliotecaAppTest {
         // 1. Should show success message
         // 2. Checked out book should NOT be listed after
         verify(mockOut).println("Thank you! Enjoy the book");
-        verifyPrintIgnoreTrailingBlanks("ID");
+        
         for (int i = 1; i < testBooks.size(); i++) {    // Should skip first book at 0 since it's checked out
-            verifyPrintIgnoreTrailingBlanks(testBooks.get(i).getId());
+            verifyPrintIgnoreTrailingBlanks(testBooks.get(i).getTitle());
         }
     }
 
@@ -177,7 +191,7 @@ public class BibliotecaAppTest {
     }
 
     @Test
-    public void testUnsuccessfulCheckoutAlreadyCheckedOut() throws IOException {
+    public void testUnsuccessfulCheckoutBookAlreadyCheckedOut() throws IOException {
         // Given - attempt to checkout an book that was already checked out
         bibliotecaApp = new BibliotecaApp(sampleData.getBookLibrary(), mockOut, mockReader);
         Book testCheckoutBook = sampleData.getBookLibrary().getItems().get(0);
@@ -187,6 +201,49 @@ public class BibliotecaAppTest {
         bibliotecaApp.checkoutBook(testCheckoutBook.getId());
         // Then
         verify(mockOut).println("Sorry, that book is not available");
+    }
+
+
+    @Test
+    public void testSuccessfulCheckoutMovie() throws IOException {
+        // Given - attempt to checkout an existing book at index 0
+        bibliotecaApp = new BibliotecaApp(sampleData.getBookLibrary(), sampleData.getMovieLibrary(), mockOut, mockReader);
+        ArrayList<Movie> testMovies = sampleData.getMovieLibrary().getItems();
+        String checkoutMovieId = testMovies.get(0).getId();
+        // When
+        bibliotecaApp.checkoutMovie(checkoutMovieId);
+        bibliotecaApp.listAvailableMovies();
+        // Then
+        // 1. Should show success message
+        // 2. Checked out book should NOT be listed after
+        verify(mockOut).println("Thank you! Enjoy the movie");
+
+        for (int i = 1; i < testMovies.size(); i++) {    // Should skip first book at 0 since it's checked out
+            verifyPrintIgnoreTrailingBlanks(testMovies.get(i).getName());
+        }
+    }
+
+    @Test
+    public void testUnsuccessfulCheckoutNoSuchMovie() throws IOException {
+        // Given - attempt to checkout an book that never existed in the library
+        bibliotecaApp = new BibliotecaApp(sampleData.getBookLibrary(), sampleData.getMovieLibrary(), mockOut, mockReader);
+        // When
+        bibliotecaApp.checkoutMovie("Bad ID");
+        // Then
+        verify(mockOut).println("Sorry, that movie is not available");
+    }
+
+    @Test
+    public void testUnsuccessfulCheckoutMovieAlreadyCheckedOut() throws IOException {
+        // Given - attempt to checkout an book that was already checked out
+        bibliotecaApp = new BibliotecaApp(sampleData.getBookLibrary(), sampleData.getMovieLibrary(), mockOut, mockReader);
+        Movie testCheckoutMovie = sampleData.getMovieLibrary().getItems().get(0);
+        testCheckoutMovie.checkOut();  // ensure it's already checked out
+
+        // When
+        bibliotecaApp.checkoutMovie(testCheckoutMovie.getId());
+        // Then
+        verify(mockOut).println("Sorry, that movie is not available");
     }
 
     @Test
@@ -208,7 +265,7 @@ public class BibliotecaAppTest {
         // When
         spyApp.executeUserSelectedOption(BibliotecaApp.RETURN_BOOK_KEY);
         // Then
-        verify(spyApp).initiateReturn();
+        verify(spyApp).initiateBookReturn();
     }
 
     @Test
@@ -220,7 +277,7 @@ public class BibliotecaAppTest {
         checkedOutBook.checkOut();  // ensure it's checked out
         when(mockReader.readLine()).thenReturn(checkedOutBook.getId()); // Attempt to return that book when prompted
         // When
-        spyApp.initiateReturn();
+        spyApp.initiateBookReturn();
         // Then - prompt user to select which one to return, invoke return
         verify(mockOut).println("Please enter the ID of the book that you would like to return: ");
         verify(spyApp).returnBook(checkedOutBook.getId());
