@@ -5,6 +5,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.junit.runner.RunWith;
+
+import static org.hamcrest.CoreMatchers.anyOf;
+import static org.hamcrest.Matchers.either;
 import static org.junit.Assert.assertThat;
 
 import java.io.BufferedReader;
@@ -62,7 +65,9 @@ public class BibliotecaAppTest {
     @Test
     public void testListAllBooks() {
         // Given - populate library with some dummy books from SampleAppData
-        bibliotecaApp = new BibliotecaApp(sampleData.getBookLibrary(), mockOut, mockReader);
+        bibliotecaApp = new BibliotecaApp(
+            sampleData.getBookLibrary(), sampleData.getMovieLibrary(), mockOut, mockReader
+        );
         ArrayList<Book> testBooks = sampleData.getBookLibrary().getItems();
 
         // When
@@ -112,8 +117,9 @@ public class BibliotecaAppTest {
         //Then
         verify(mockOut).println("Please enter the number of the option that you would like to select: ");
         verify(mockOut).println(BibliotecaApp.LIST_BOOKS_KEY + ". List of books");
-        verify(mockOut).println(BibliotecaApp.CHECK_OUT_KEY + ". Check-out a book");
-        verify(mockOut).println(BibliotecaApp.RETURN_KEY + ". Return a book");
+        verify(mockOut).println(BibliotecaApp.CHECK_OUT_BOOK_KEY + ". Check-out a book");
+        verify(mockOut).println(BibliotecaApp.RETURN_BOOK_KEY + ". Return a book");
+        verify(mockOut).println(BibliotecaApp.LIST_MOVIES_KEY + ". List of movies");
         verify(mockOut).println(BibliotecaApp.EXIT_APP_KEY + ". Exit the application");
     }
 
@@ -135,7 +141,7 @@ public class BibliotecaAppTest {
         String checkoutBookId = sampleData.getBookLibrary().getItems().get(0).getId();
         when(mockReader.readLine()).thenReturn(checkoutBookId); // Attempt to checkout the first book on the list
         // When
-        spyApp.executeUserSelectedOption(BibliotecaApp.CHECK_OUT_KEY);
+        spyApp.executeUserSelectedOption(BibliotecaApp.CHECK_OUT_BOOK_KEY);
         // Then - list all books, prompt user to select which one to checkout, invoke checkout on selected book
         verify(mockOut).println("Please enter the ID of the book that you would like to check-out: ");
         verify(spyApp).checkoutBook(checkoutBookId);
@@ -200,7 +206,7 @@ public class BibliotecaAppTest {
         // Given
         BibliotecaApp spyApp = spy(bibliotecaApp);
         // When
-        spyApp.executeUserSelectedOption(BibliotecaApp.RETURN_KEY);
+        spyApp.executeUserSelectedOption(BibliotecaApp.RETURN_BOOK_KEY);
         // Then
         verify(spyApp).initiateReturn();
     }
@@ -261,6 +267,47 @@ public class BibliotecaAppTest {
         // Then - should notify user and prompt user for input one more time
         verify(mockOut).println("Please select a valid option!");
         verify(mockReader, times(2)).readLine();
+    }
+
+    @Test
+    public void testSelectListMovieMenuOption() {
+        // Given
+        bibliotecaApp = new BibliotecaApp(
+                sampleData.getBookLibrary(), sampleData.getMovieLibrary(), mockOut, mockReader
+        );
+        ArrayList<Movie> testMovies = sampleData.getMovieLibrary().getItems();
+        BibliotecaApp spyApp = spy(bibliotecaApp);
+
+        // When
+        spyApp.executeUserSelectedOption(BibliotecaApp.LIST_MOVIES_KEY);
+
+        // Then
+        int numColumns = sampleData.getMovieLibrary().getHeaderStrings().size();
+        int totalExpectedFields = numColumns * (testMovies.size() + 1);
+        verify(mockOut, times(totalExpectedFields)).print(captor.capture());
+
+        List<String> printedFields = captor.getAllValues();
+
+        assertThat(printedFields.get(0), containsString("ID"));
+        assertThat(printedFields.get(1), containsString("Name"));
+        assertThat(printedFields.get(2), containsString("Year Released"));
+        assertThat(printedFields.get(3), containsString("Director"));
+        assertThat(printedFields.get(4), containsString("Rating"));
+
+        int fieldIndex = 5;
+        for (Movie movieToPrint : testMovies) {
+            // Each subsequent printed line should contain all movie fields
+            assertThat(printedFields.get(fieldIndex), containsString(movieToPrint.getId()));
+            assertThat(printedFields.get(fieldIndex+1), containsString(movieToPrint.getName()));
+            assertThat(printedFields.get(fieldIndex+2), containsString(movieToPrint.getYearReleased()));
+            assertThat(printedFields.get(fieldIndex+3), containsString((movieToPrint.getDirector())));
+            if (movieToPrint.getRating() == null) {
+                assertThat(printedFields.get(fieldIndex+4), containsString("unrated"));
+            } else {
+                assertThat(printedFields.get(fieldIndex+4), containsString(Integer.toString(movieToPrint.getRating())));
+            }
+            fieldIndex += 5;
+        }
     }
 
     @Test

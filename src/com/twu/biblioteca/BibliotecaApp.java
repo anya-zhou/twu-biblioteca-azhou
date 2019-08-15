@@ -11,22 +11,25 @@ import java.util.Map;
 public class BibliotecaApp {
     private PrintStream printer = System.out;
     private BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-    private Library<Book> bookLibrary = new Library<Book>();
+    private Library<Book> bookLibrary = new Library<>();
+    private Library<Movie> movieLibrary = new Library<>();
 
     static final String WELCOME_MSG = "Welcome to Biblioteca. Your one-stop-shop for great book titles in Bangalore!";
     static final String COL_DIV = "  ";
     static final int COL_WIDTH = 30;
     private static final int ID_COL_WIDTH = 5;
     public static final String LIST_BOOKS_KEY = "1";
-    public static final String CHECK_OUT_KEY = "2";
-    public static final String RETURN_KEY = "3";
-    public static final String EXIT_APP_KEY = "4";
+    public static final String CHECK_OUT_BOOK_KEY = "2";
+    public static final String RETURN_BOOK_KEY = "3";
+    public static final String LIST_MOVIES_KEY = "4";
+    public static final String EXIT_APP_KEY = "5";
 
     static final Map<String, String> menu = new HashMap<String, String>() {
         {
             put(LIST_BOOKS_KEY, "List of books");
-            put(CHECK_OUT_KEY, "Check-out a book");
-            put(RETURN_KEY, "Return a book");
+            put(CHECK_OUT_BOOK_KEY, "Check-out a book");
+            put(RETURN_BOOK_KEY, "Return a book");
+            put(LIST_MOVIES_KEY, "List of movies");
             put(EXIT_APP_KEY, "Exit the application");
         }
     };
@@ -36,18 +39,31 @@ public class BibliotecaApp {
         this.reader = reader;
     }
 
-    public BibliotecaApp(Library<Book> bookLibrary) {
+    public BibliotecaApp(Library<Book> bookLibrary, Library<Movie> movieLibrary) {
         this.bookLibrary = bookLibrary;
+        this.movieLibrary = movieLibrary;
     }
 
     public BibliotecaApp(Library<Book> bookLibrary, PrintStream printer, BufferedReader reader) {
+        this(printer, reader);
+        this.bookLibrary = bookLibrary;
+    }
+
+    public BibliotecaApp(
+        Library<Book> bookLibrary, Library<Movie> movieLibrary,
+        PrintStream printer, BufferedReader reader
+    ) {
+        this(bookLibrary, movieLibrary);
         this.printer = printer;
         this.reader = reader;
-        this.bookLibrary = bookLibrary;
     }
 
     public Library<Book> getBookLibrary() {
         return bookLibrary;
+    }
+
+    public Library<Movie> getMovieLibrary() {
+        return movieLibrary;
     }
 
     public void start() {
@@ -90,11 +106,14 @@ public class BibliotecaApp {
                 case LIST_BOOKS_KEY:
                     this.listAvailableBooks();
                     break;
-                case CHECK_OUT_KEY:
+                case CHECK_OUT_BOOK_KEY:
                     this.initiateCheckOut();
                     break;
-                case RETURN_KEY:
+                case RETURN_BOOK_KEY:
                     this.initiateReturn();
+                    break;
+                case LIST_MOVIES_KEY:
+                    this.listAvailableItems(movieLibrary);
                     break;
                 case EXIT_APP_KEY:
                     System.exit(0);
@@ -133,14 +152,18 @@ public class BibliotecaApp {
         this.returnBook(bookId);
     }
 
-    public void listAvailableBooks() {
-        ArrayList<Book> availableBooks = this.bookLibrary.getAvailableItems();
+    public void listAvailableItems(Library library) {
+        ArrayList<LibraryItem> availableItems = library.getAvailableItems();
 
-        this.printFieldStringsAsLine(bookLibrary.getHeaderStrings());
+        this.printFieldStringsAsLine(library.getHeaderStrings());
 
-        for (int i = 0; i < availableBooks.size(); i++) {
-            this.printFieldStringsAsLine(availableBooks.get(i).getPrintableFieldStrings());
+        for (int i = 0; i < availableItems.size(); i++) {
+            this.printFieldStringsAsLine(availableItems.get(i).getPrintableFieldStrings());
         }
+    }
+
+    public void listAvailableBooks() {
+        this.listAvailableItems(this.bookLibrary);
     }
 
     private void printFieldStringsAsLine(ArrayList<String> fieldStrings) {
@@ -182,7 +205,7 @@ public class BibliotecaApp {
         // Populate bookLibrary with some dummy books for show
         SampleAppData sampleData = new SampleAppData();
 
-        BibliotecaApp app = new BibliotecaApp(sampleData.getBookLibrary());
+        BibliotecaApp app = new BibliotecaApp(sampleData.getBookLibrary(), sampleData.getMovieLibrary());
         app.start();
     }
 }
