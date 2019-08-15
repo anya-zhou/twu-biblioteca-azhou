@@ -10,7 +10,7 @@ import java.util.Map;
 public class BibliotecaApp {
     private PrintStream printer = System.out;
     private BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-    private Library library = new Library();
+    private Library<Book> bookLibrary = new Library<Book>();
 
     static final String WELCOME_MSG = "Welcome to Biblioteca. Your one-stop-shop for great book titles in Bangalore!";
     static final String COL_DIV = "  ";
@@ -35,18 +35,18 @@ public class BibliotecaApp {
         this.reader = reader;
     }
 
-    public BibliotecaApp(Library library) {
-        this.library = library;
+    public BibliotecaApp(Library<Book> bookLibrary) {
+        this.bookLibrary = bookLibrary;
     }
 
-    public BibliotecaApp(Library library, PrintStream printer, BufferedReader reader) {
+    public BibliotecaApp(Library<Book> bookLibrary, PrintStream printer, BufferedReader reader) {
         this.printer = printer;
         this.reader = reader;
-        this.library = library;
+        this.bookLibrary = bookLibrary;
     }
 
-    public Library getLibrary() {
-        return library;
+    public Library<Book> getBookLibrary() {
+        return bookLibrary;
     }
 
     public void start() {
@@ -87,7 +87,7 @@ public class BibliotecaApp {
         if (menu.containsKey(userInput)) {
             switch(userInput) {
                 case LIST_BOOKS_KEY:
-                    this.listAllBooks();
+                    this.listAvailableBooks();
                     break;
                 case CHECK_OUT_KEY:
                     this.initiateCheckOut();
@@ -132,24 +132,12 @@ public class BibliotecaApp {
         this.returnBook(bookId);
     }
 
-    public void listAllBooks() {
-        this.printer.println(this.getBookListHeader());
-        for (Book book : this.library.getAvailableBooks()) {
-            String bookString = formatToCol(book.getId(), ID_COL_WIDTH);
-            bookString += formatToCol(book.getTitle());
-            bookString += formatToCol(book.getAuthorName());
-            bookString += formatToCol(book.getYearPublished());
+    public void listAvailableBooks() {
+        this.printer.println(Book.getHeadingString(ID_COL_WIDTH, COL_WIDTH, COL_DIV));
+        for (Book book : this.bookLibrary.getAvailableItems()) {
+            String bookString = book.getFormattedString(ID_COL_WIDTH, COL_WIDTH, COL_DIV);
             this.printer.println(bookString);
         }
-    }
-
-    private String getBookListHeader() {
-        String[] headerFields = new String[]{"Title", "Author", "Year Published"};
-        String header = formatToCol("ID", ID_COL_WIDTH);
-        for (String field : headerFields) {
-            header += formatToCol(field);
-        }
-        return header;
     }
 
     private String formatToCol(String s) {
@@ -161,7 +149,7 @@ public class BibliotecaApp {
     }
 
     public void checkoutBook(String bookId) {
-        Book book = this.library.getBook(bookId);
+        Book book = this.bookLibrary.getItem(bookId);
         if (book != null && book.isAvailable()) {
             book.checkOut();
             this.printer.println("Thank you! Enjoy the book");
@@ -171,7 +159,7 @@ public class BibliotecaApp {
     }
 
     public void returnBook(String bookId) {
-        Book book = this.library.getBook(bookId);
+        Book book = this.bookLibrary.getItem(bookId);
         if (book != null) {
             book.returning();
             this.printer.println("Thank you for returning the book");
@@ -181,10 +169,10 @@ public class BibliotecaApp {
     }
 
     public static void main(String[] args) {
-        // Populate library with some dummy books for show
+        // Populate bookLibrary with some dummy books for show
         SampleAppData sampleData = new SampleAppData();
 
-        BibliotecaApp app = new BibliotecaApp(sampleData.getLibrary());
+        BibliotecaApp app = new BibliotecaApp(sampleData.getBookLibrary());
         app.start();
     }
 }

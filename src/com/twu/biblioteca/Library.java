@@ -3,31 +3,31 @@ package com.twu.biblioteca;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-public class Library {
-    private ArrayList<Book> books;
+public class Library<T extends LibraryItem> {
+    private ArrayList<T> items;
 
     public Library() {
-        this.books = new ArrayList<Book>();
+        this.items = new ArrayList<T>();
     }
 
-    public Library(ArrayList<Book> books) {
-        this.books = books;
+    public Library(ArrayList<T> items) {
+        this.items = items;
     }
 
-    public ArrayList<Book> getBooks() {
-        return books;
+    public ArrayList<T> getItems() {
+        return items;
     }
 
-    public Book getBook(String bookId) {
-        for (Book book : this.books) {
-            if (book.getId().equals(bookId)) {
-                return book;
+    public T getItem(String itemId) {
+        for (T item : this.items) {
+            if (item.getId().equals(itemId)) {
+                return item;
             }
         }
         return null;
     }
 
-    public ArrayList<Book> getAvailableBooks() {
-        return (ArrayList<Book>) this.books.stream().filter(book -> book.isAvailable()).collect(Collectors.toList());
+    public ArrayList<T> getAvailableItems() {
+        return (ArrayList<T>) this.items.stream().filter(item -> item.isAvailable()).collect(Collectors.toList());
     }
 }

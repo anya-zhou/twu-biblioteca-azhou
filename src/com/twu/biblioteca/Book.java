@@ -1,21 +1,24 @@
 package com.twu.biblioteca;
 
-public class Book {
+import java.util.ArrayList;
+
+public class Book extends LibraryItem{
     private String title;
     private String authorName;
     private String yearPublished;
-    private String id;
-    private boolean isAvailable;
+    private static ArrayList<String> headerFields = new ArrayList<String>(){
+        {
+            add("Title");
+            add("Author");
+            add("Year Published");
+        }
+    };
 
-    // Assumes that each book has an unique ID
-    // IRL ID could be something like a scan-able barcode, since it's very much possible for two different
-    // books to have the same title - this means user needs to use a different unique key to make selections
     public Book(String id, String title, String authorName, String yearPublished) {
+        this.id = id;
         this.title = title;
         this.authorName = authorName;
         this.yearPublished = yearPublished;
-        this.id = id;
-        this.isAvailable = true;
     }
 
     public String getTitle() {
@@ -30,24 +33,16 @@ public class Book {
         return this.yearPublished;
     }
 
-    public String getId() {
-        return this.id;
-    }
-
-    public boolean isAvailable() {
-        return this.isAvailable;
-    }
-
-    public void checkOut() {
-        this.isAvailable = false;
-    }
-
-    public void returning() {
-        this.isAvailable = true;
+    public static String getHeadingString(int idColWidth, int colWidth, String colDivider) {
+     return getHeadingString(headerFields, idColWidth, colWidth, colDivider);
     }
 
     @Override
-    public String toString() {
-        return this.title;
+    public String getFormattedString(int idColWidth, int colWidth, String colDivider) {
+        String bookString = formatToCol(this.getId(), idColWidth, colDivider);
+        bookString += formatToCol(this.getTitle(), colWidth, colDivider);
+        bookString += formatToCol(this.getAuthorName(), colWidth, colDivider);
+        bookString += formatToCol(this.getYearPublished(), colWidth, colDivider);
+        return bookString;
     }
 }

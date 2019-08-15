@@ -6,10 +6,21 @@ import static org.hamcrest.core.Is.is;
 
 public class BookTest {
     @Test
-    public void testToStringIsTitle() {
+    public void testGetFormattedString() {
+        // Given
         String testTitle = "Test Title";
         Book testBook = new Book("1", testTitle, "Test Author", "1923");
-        assertThat(testBook.toString(), is(testTitle));
+        int testIdWidth = 3;
+        int testColWidth = 20;
+        String testDivider = "  ";
+        // When
+        String testString =  testBook.getFormattedString(testIdWidth, testColWidth, testDivider);
+        String[] bookDetails = testString.split(testDivider+"\\s+");
+        // Then
+        assertThat(bookDetails[0].trim(), is(testBook.getId()));
+        assertThat(bookDetails[1].trim(), is(testBook.getTitle()));
+        assertThat(bookDetails[2].trim(), is(testBook.getAuthorName()));
+        assertThat(bookDetails[3].trim(), is(testBook.getYearPublished()));
     }
 
     @Test

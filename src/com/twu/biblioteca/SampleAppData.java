@@ -3,7 +3,7 @@ package com.twu.biblioteca;
 import java.util.ArrayList;
 
 public class SampleAppData {
-    private static Library library;
+    private static Library<Book> bookLibrary;
 
     public SampleAppData() {
         // Initialize some existing books in a library for test
@@ -16,10 +16,10 @@ public class SampleAppData {
         );
         testBooks.add(testBook1);
         testBooks.add(testBook2);
-        library = new Library(testBooks);
+        bookLibrary = new Library<Book>(testBooks);
     }
 
-    public Library getLibrary() {
-        return library;
+    public Library<Book> getBookLibrary() {
+        return bookLibrary;
     }
 }
