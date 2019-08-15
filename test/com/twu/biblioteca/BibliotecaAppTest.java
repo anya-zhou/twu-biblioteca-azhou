@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 
@@ -19,7 +20,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.hamcrest.core.Is.is;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.CoreMatchers.containsString;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BibliotecaAppTest {
@@ -67,27 +69,30 @@ public class BibliotecaAppTest {
         bibliotecaApp.listAvailableBooks();
 
         // Then
-        verify(mockOut, times(testBooks.size() + 1)).println(captor.capture());
+        int numColumns = testBooks.get(0).getPrintableHeaders().size();
+        int totalExpectedFields = numColumns * (testBooks.size() + 1);
+        verify(mockOut, times(totalExpectedFields)).print(captor.capture());
 
-        for (int i = 0; i < testBooks.size() + 1; i++) {
-            String outLine = captor.getAllValues().get(i);
-            String[] bookDetails = outLine.split("\\s{2,}"); // Columns separated by 2+ spaces
+        List<String> printedFields = captor.getAllValues();
 
-            if (i == 0) {
-                // Should print heading first
-                assertThat(bookDetails[0], is("ID"));
-                assertThat(bookDetails[1], is("Title"));
-                assertThat(bookDetails[2], is("Author"));
-                assertThat(bookDetails[3], is("Year Published"));
-            } else {
-                // Each subsequent printed line should contain title, author and year
-                Book bookToPrint = testBooks.get(i-1);
-                assertThat(bookDetails[0], is(bookToPrint.getId()));
-                assertThat(bookDetails[1], is(bookToPrint.getTitle()));
-                assertThat(bookDetails[2], is(bookToPrint.getAuthorName()));
-                assertThat(bookDetails[3], is(bookToPrint.getYearPublished()));
-            }
+        assertThat(printedFields.get(0), containsString("ID"));
+        assertThat(printedFields.get(1), containsString("Title"));
+        assertThat(printedFields.get(2), containsString("Author"));
+        assertThat(printedFields.get(3), containsString("Year Published"));
+
+        int fieldIndex = 4;
+        for (Book bookToPrint : testBooks) {
+            // Each subsequent printed line should contain title, author and year
+            assertThat(printedFields.get(fieldIndex), containsString(bookToPrint.getId()));
+            assertThat(printedFields.get(fieldIndex+1), containsString(bookToPrint.getTitle()));
+            assertThat(printedFields.get(fieldIndex+2), containsString(bookToPrint.getAuthorName()));
+            assertThat(printedFields.get(fieldIndex+3), containsString(bookToPrint.getYearPublished()));
+            fieldIndex += 4;
         }
+    }
+
+    private void verifyPrintIgnoreTrailingBlanks(String s) {
+        verify(mockOut).print(startsWith(s));
     }
 
     @Test
@@ -97,7 +102,7 @@ public class BibliotecaAppTest {
         // When
         bibliotecaApp.listAvailableBooks();
         // Then - print header only
-        verify(mockOut, times(1)).println(startsWith("ID"));
+        verify(mockOut, times(1)).println();
     }
 
     @Test
@@ -149,9 +154,9 @@ public class BibliotecaAppTest {
         // 1. Should show success message
         // 2. Checked out book should NOT be listed after
         verify(mockOut).println("Thank you! Enjoy the book");
-        verify(mockOut).println(startsWith("ID"));
+        verifyPrintIgnoreTrailingBlanks("ID");
         for (int i = 1; i < testBooks.size(); i++) {    // Should skip first book at 0 since it's checked out
-            verify(mockOut).println(startsWith(testBooks.get(i).getId()));
+            verifyPrintIgnoreTrailingBlanks(testBooks.get(i).getId());
         }
     }
 
@@ -229,7 +234,10 @@ public class BibliotecaAppTest {
         // Then
         // 1. Returned book should show in the list
         // 2. Should show success message
-        verify(mockOut).println(startsWith(checkoutBook.getId()));
+        int numColumns = testBooks.get(0).getPrintableHeaders().size();
+        int totalExpectedFields = numColumns * (testBooks.size() + 1);
+        verify(mockOut, times(totalExpectedFields)).print(captor.capture());
+        assertThat(captor.getAllValues(), hasItem(containsString(checkoutBook.getTitle())));
         verify(mockOut).println("Thank you for returning the book");
     }
 

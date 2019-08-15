@@ -1,5 +1,7 @@
 package com.twu.biblioteca;
 
+import com.sun.org.apache.bcel.internal.generic.ARRAYLENGTH;
+
 import java.util.ArrayList;
 
 public abstract class LibraryItem {
@@ -9,7 +11,7 @@ public abstract class LibraryItem {
     // books to have the same title - this means user needs to use a different unique key to make selections
     protected String id;
     private boolean isAvailable = true;
-    private static final String ID_COL_NAME = "ID";
+    protected static final String ID_COL_NAME = "ID";
 
     public String getId() {
         return this.id;
@@ -27,17 +29,7 @@ public abstract class LibraryItem {
         this.isAvailable = true;
     }
 
-    public abstract String getFormattedString(int idColWidth, int colWidth, String colDivider);
+    public abstract ArrayList<String> getPrintableHeaders();
 
-    public static String getHeadingString(ArrayList<String> headerFields, int idColWidth, int colWidth, String colDivider) {
-        String header = formatToCol(ID_COL_NAME, idColWidth, colDivider);
-        for (String field : headerFields) {
-            header += formatToCol(field, colWidth, colDivider);
-        }
-        return header;
-    }
-
-    public static String formatToCol(String s, int colWidth, String colDivider) {
-        return String.format("%-" + colWidth + "s" + colDivider, s);
-    }
+    public abstract ArrayList<String> getPrintableFieldStrings();
 }

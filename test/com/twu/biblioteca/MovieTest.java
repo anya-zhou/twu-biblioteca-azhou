@@ -2,42 +2,40 @@ package com.twu.biblioteca;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
+
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 public class MovieTest {
     @Test
-    public void testGetFormattedStringNoRating() {
+    public void testGetPrintableFieldStringsNoRating() {
         // Given
-        String testTitle = "Test Movie";
-        Movie testMovie = new Movie("2", testTitle, "1892", "Test Director");
-        int testIdWidth = 3;
-        int testColWidth = 20;
-        String testDivider = "  ";
+        String testTitle = "Test Title";
+        Movie testMovie = new Movie("1", testTitle, "Test Author", "1923");
         // When
-        String testString =  testMovie.getFormattedString(testIdWidth, testColWidth, testDivider);
-        String[] movieDetails = testString.split(testDivider+"\\s+");
+        ArrayList<String> bookDetails = testMovie.getPrintableFieldStrings();
         // Then
-        assertThat(movieDetails[0].trim(), is(testMovie.getId()));
-        assertThat(movieDetails[1].trim(), is(testMovie.getName()));
-        assertThat(movieDetails[2].trim(), is(testMovie.getYearReleased()));
-        assertThat(movieDetails[3].trim(), is(testMovie.getDirector()));
-        assertThat(movieDetails[4].trim(), is("N/A"));
+        assertThat(bookDetails.get(0), is(testMovie.getId()));
+        assertThat(bookDetails.get(1), is(testMovie.getName()));
+        assertThat(bookDetails.get(2), is(testMovie.getYearReleased()));
+        assertThat(bookDetails.get(3), is(testMovie.getDirector()));
+        assertThat(bookDetails.get(4), is("unrated"));
     }
 
     @Test
-    public void testGetFormattedStringWithRating() {
+    public void testGetPrintableFieldStringWithRating() {
         // Given
-        String testTitle = "Test Movie";
+        String testTitle = "Test Title";
         Movie testMovie = new Movie("2", testTitle, "1892", "Test Director", 10);
-        int testIdWidth = 3;
-        int testColWidth = 20;
-        String testDivider = "  ";
         // When
-        String testString =  testMovie.getFormattedString(testIdWidth, testColWidth, testDivider);
-        String[] movieDetails = testString.split(testDivider+"\\s+");
+        ArrayList<String> bookDetails = testMovie.getPrintableFieldStrings();
         // Then
-        assertThat(movieDetails[4].trim(), is("10"));
+        assertThat(bookDetails.get(0), is(testMovie.getId()));
+        assertThat(bookDetails.get(1), is(testMovie.getName()));
+        assertThat(bookDetails.get(2), is(testMovie.getYearReleased()));
+        assertThat(bookDetails.get(3), is(testMovie.getDirector()));
+        assertThat(bookDetails.get(4), is("10"));
     }
 
     @Test

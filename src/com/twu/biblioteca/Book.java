@@ -6,8 +6,9 @@ public class Book extends LibraryItem{
     private String title;
     private String authorName;
     private String yearPublished;
-    private static ArrayList<String> headerFields = new ArrayList<String>(){
+    private final static ArrayList<String> headerFields = new ArrayList<String>(){
         {
+            add(ID_COL_NAME);
             add("Title");
             add("Author");
             add("Year Published");
@@ -33,16 +34,18 @@ public class Book extends LibraryItem{
         return this.yearPublished;
     }
 
-    public static String getHeadingString(int idColWidth, int colWidth, String colDivider) {
-     return getHeadingString(headerFields, idColWidth, colWidth, colDivider);
+    @Override
+    public ArrayList<String> getPrintableHeaders() {
+        return headerFields;
     }
 
     @Override
-    public String getFormattedString(int idColWidth, int colWidth, String colDivider) {
-        String bookString = formatToCol(this.getId(), idColWidth, colDivider);
-        bookString += formatToCol(this.getTitle(), colWidth, colDivider);
-        bookString += formatToCol(this.getAuthorName(), colWidth, colDivider);
-        bookString += formatToCol(this.getYearPublished(), colWidth, colDivider);
-        return bookString;
+    public ArrayList<String> getPrintableFieldStrings() {
+        ArrayList<String> fieldStrings = new ArrayList<>();
+        fieldStrings.add(this.getId());
+        fieldStrings.add(this.getTitle());
+        fieldStrings.add(this.getAuthorName());
+        fieldStrings.add(this.getYearPublished());
+        return fieldStrings;
     }
 }

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -133,11 +134,20 @@ public class BibliotecaApp {
     }
 
     public void listAvailableBooks() {
-        this.printer.println(Book.getHeadingString(ID_COL_WIDTH, COL_WIDTH, COL_DIV));
-        for (Book book : this.bookLibrary.getAvailableItems()) {
-            String bookString = book.getFormattedString(ID_COL_WIDTH, COL_WIDTH, COL_DIV);
-            this.printer.println(bookString);
+        ArrayList<Book> availableBooks = this.bookLibrary.getAvailableItems();
+
+        this.printFieldStringsAsLine(bookLibrary.getHeaderStrings());
+
+        for (int i = 0; i < availableBooks.size(); i++) {
+            this.printFieldStringsAsLine(availableBooks.get(i).getPrintableFieldStrings());
         }
+    }
+
+    private void printFieldStringsAsLine(ArrayList<String> fieldStrings) {
+        for (String fieldString : fieldStrings) {
+            this.printer.print(formatToCol(fieldString, COL_WIDTH));
+        }
+        this.printer.println();
     }
 
     private String formatToCol(String s) {
