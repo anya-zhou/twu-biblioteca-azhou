@@ -356,7 +356,7 @@ public class BibliotecaAppTest {
     }
 
     @Test
-    public void testUnsuccessfulReturnNotCheckedOutByUser() {
+    public void testUnsuccessfulReturnNotCheckedOutBySameUser() {
         // Given
         ArrayList<Book> testBooks = sampleData.getBookLibrary().getItems();
         Book checkoutBook = testBooks.get(0);

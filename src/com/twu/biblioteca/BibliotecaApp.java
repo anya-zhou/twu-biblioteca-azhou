@@ -248,7 +248,8 @@ public class BibliotecaApp {
 
     public void returnBook(User user, String bookId) {
         Book book = this.bookLibrary.getItem(bookId);
-        if (book != null) {
+        // Check that the book exits and was previously checked out by the same user
+        if (book != null && this.checkoutRecord.containsKey(user) && this.checkoutRecord.get(user).contains(book)) {
             this.recordReturn(user, book);
             this.printer.println("Thank you for returning the book");
         } else {
