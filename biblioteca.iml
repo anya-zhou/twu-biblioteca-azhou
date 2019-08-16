@@ -15,5 +15,6 @@
     <orderEntry type="library" name="mockito-core-1.9.5" level="project" />
     <orderEntry type="library" name="objenesis-1.2" level="project" />
     <orderEntry type="library" name="system-rules-1.19.0" level="project" />
+    <orderEntry type="library" name="JUnitParams-1.0.4" level="project" />
   </component>
 </module>
