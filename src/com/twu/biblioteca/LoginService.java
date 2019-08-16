@@ -17,4 +17,13 @@ public class LoginService {
         }
         return null;
     }
+
+    public User getUser(String username) {
+        for (User user : this.users) {
+            if (user.getUsername().equals(username)) {
+                return user;
+            }
+        }
+        return null;
+    }
 }

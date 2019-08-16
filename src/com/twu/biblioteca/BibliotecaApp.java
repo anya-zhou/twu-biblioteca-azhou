@@ -1,5 +1,7 @@
 package com.twu.biblioteca;
 
+import sun.rmi.runtime.Log;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -7,12 +9,16 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class BibliotecaApp {
     private PrintStream printer = System.out;
     private BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     private Library<Book> bookLibrary = new Library<>();
     private Library<Movie> movieLibrary = new Library<>();
+    private User loggedInUser;
+    private LoginService loginService;
+    private Map<User, ArrayList<LibraryItem>> checkoutRecord = new HashMap<>();
 
     static final String WELCOME_MSG = "Welcome to Biblioteca. Your one-stop-shop for great book titles in Bangalore!";
     static final String COL_DIV = "  ";
@@ -36,26 +42,23 @@ public class BibliotecaApp {
         }
     };
 
-    public BibliotecaApp(PrintStream printer, BufferedReader reader) {
+    public BibliotecaApp(PrintStream printer, BufferedReader reader, LoginService loginService) {
         this.printer = printer;
         this.reader = reader;
+        this.loginService = loginService;
     }
 
-    public BibliotecaApp(Library<Book> bookLibrary, Library<Movie> movieLibrary) {
+    public BibliotecaApp(Library<Book> bookLibrary, Library<Movie> movieLibrary, LoginService loginService) {
         this.bookLibrary = bookLibrary;
         this.movieLibrary = movieLibrary;
-    }
-
-    public BibliotecaApp(Library<Book> bookLibrary, PrintStream printer, BufferedReader reader) {
-        this(printer, reader);
-        this.bookLibrary = bookLibrary;
+        this.loginService = loginService;
     }
 
     public BibliotecaApp(
         Library<Book> bookLibrary, Library<Movie> movieLibrary,
-        PrintStream printer, BufferedReader reader
+        PrintStream printer, BufferedReader reader, LoginService loginService
     ) {
-        this(bookLibrary, movieLibrary);
+        this(bookLibrary, movieLibrary, loginService);
         this.printer = printer;
         this.reader = reader;
     }
@@ -140,12 +143,28 @@ public class BibliotecaApp {
     }
 
     public void listAvailableMovies() {
-        this.listAvailableItems(movieLibrary);
+        this.listAvailableItems(this.movieLibrary);
     }
 
     public void initiateBookCheckout() {
-        String itemId = getItemIdFromUser("check-out", bookLibrary.getItemDescription());
-        this.checkoutBook(itemId);
+        loggedInUser = this.loginUser();
+        if (loggedInUser != null) {
+            String itemId = getItemIdFromUser("check-out", bookLibrary.getItemDescription());
+            this.checkoutBook(itemId);
+        }
+    }
+
+    private User loginUser() {
+        try {
+            this.printer.println("Please enter your library number in the following format 'xxx-xxxx': ");
+            String username = this.reader.readLine();
+            this.printer.println("Please enter your password: ");
+            String password = this.reader.readLine();
+            return loginService.login(username, password);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public void initiateMovieCheckout() {
@@ -208,10 +227,18 @@ public class BibliotecaApp {
         LibraryItem item = library.getItem(itemId);
         if (item != null && item.isAvailable()) {
             item.checkOut();
+            this.recordCheckout(loggedInUser, item, library);
             this.printer.println("Thank you! Enjoy the " + library.getItemDescription());
         } else {
             this.printer.println("Sorry, that " + library.getItemDescription() + " is not available");
         }
+    }
+
+    private void recordCheckout(User user, LibraryItem checkedOutItem, Library library) {
+        if (!this.checkoutRecord.containsKey(user)) {
+            this.checkoutRecord.put(user, new ArrayList<LibraryItem>());
+        }
+        this.checkoutRecord.get(user).add(checkedOutItem);
     }
 
     public void returnBook(String bookId) {
@@ -224,11 +251,27 @@ public class BibliotecaApp {
         }
     }
 
+    public User getUser(String userId) {
+        return loginService.getUser(userId);
+    }
+
+    public ArrayList<Book> getCheckedOutBooks(User user) {
+        ArrayList<Book> checkedoutBooks = new ArrayList<>();
+        if (this.checkoutRecord.containsKey(user)) {
+            for (LibraryItem item : this.checkoutRecord.get(user)) {
+                if (Book.class.isInstance(item)) {
+                    checkedoutBooks.add((Book) item);
+                }
+            }
+        }
+        return checkedoutBooks;
+    }
+
     public static void main(String[] args) {
         // Populate bookLibrary with some dummy books for show
         SampleAppData sampleData = new SampleAppData();
-
-        BibliotecaApp app = new BibliotecaApp(sampleData.getBookLibrary(), sampleData.getMovieLibrary());
+        LoginService loginService = new LoginService(sampleData.getUsers());
+        BibliotecaApp app = new BibliotecaApp(sampleData.getBookLibrary(), sampleData.getMovieLibrary(), loginService);
         app.start();
     }
 }
