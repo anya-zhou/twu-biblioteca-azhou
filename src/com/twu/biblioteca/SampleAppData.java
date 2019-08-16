@@ -37,4 +37,9 @@ public class SampleAppData {
     public Library<Movie> getMovieLibrary() {
         return movieLibrary;
     }
+
+    public ArrayList<User> getUsers() {
+        User testUser1 = new User("123-4567", "password");
+        return new ArrayList<User>() { { add(testUser1); }};
+    }
 }
