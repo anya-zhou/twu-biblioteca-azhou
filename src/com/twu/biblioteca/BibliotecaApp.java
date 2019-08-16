@@ -29,7 +29,8 @@ public class BibliotecaApp {
     public static final String RETURN_BOOK_KEY = "3";
     public static final String LIST_MOVIES_KEY = "4";
     public static final String CHECK_OUT_MOVIE_KEY = "5";
-    public static final String EXIT_APP_KEY = "6";
+    public static final String VIEW_CHECKED_OUT_BOOKS_KEY = "6";
+    public static final String EXIT_APP_KEY = "7";
 
     static final Map<String, String> menu = new HashMap<String, String>() {
         {
@@ -38,6 +39,7 @@ public class BibliotecaApp {
             put(RETURN_BOOK_KEY, "Return a book");
             put(LIST_MOVIES_KEY, "List of movies");
             put(CHECK_OUT_MOVIE_KEY, "Check-out a movie");
+            put(VIEW_CHECKED_OUT_BOOKS_KEY, "View books checked out");
             put(EXIT_APP_KEY, "Exit the application");
         }
     };
@@ -186,12 +188,15 @@ public class BibliotecaApp {
     }
 
     public void initiateBookReturn() {
-        this.initiateReturn(bookLibrary);
+        loggedInUser = this.loginUser();
+        if (loggedInUser != null) {
+            this.initiateReturn(bookLibrary);
+        }
     }
 
     public void initiateReturn(Library library) {
-        String bookId = getItemIdFromUser("return", library.getItemDescription());
-        this.returnBook(bookId);
+        String itemId = getItemIdFromUser("return", library.getItemDescription());
+        this.returnBook(loggedInUser, itemId);
     }
 
     public void listAvailableItems(Library library) {
@@ -226,28 +231,35 @@ public class BibliotecaApp {
     public void checkout(String itemId, Library library) {
         LibraryItem item = library.getItem(itemId);
         if (item != null && item.isAvailable()) {
-            item.checkOut();
-            this.recordCheckout(loggedInUser, item, library);
+            this.recordCheckout(loggedInUser, item);
             this.printer.println("Thank you! Enjoy the " + library.getItemDescription());
         } else {
             this.printer.println("Sorry, that " + library.getItemDescription() + " is not available");
         }
     }
 
-    private void recordCheckout(User user, LibraryItem checkedOutItem, Library library) {
+    protected void recordCheckout(User user, LibraryItem item) {
         if (!this.checkoutRecord.containsKey(user)) {
             this.checkoutRecord.put(user, new ArrayList<LibraryItem>());
         }
-        this.checkoutRecord.get(user).add(checkedOutItem);
+        this.checkoutRecord.get(user).add(item);
+        item.checkOut();
     }
 
-    public void returnBook(String bookId) {
+    public void returnBook(User user, String bookId) {
         Book book = this.bookLibrary.getItem(bookId);
         if (book != null) {
-            book.returning();
+            this.recordReturn(user, book);
             this.printer.println("Thank you for returning the book");
         } else {
             this.printer.println("That is not a valid book to return.");
+        }
+    }
+
+    private void recordReturn(User user, LibraryItem item) {
+        if (this.checkoutRecord.containsKey(user)) {
+            this.checkoutRecord.get(user).remove(item);
+            item.returning();
         }
     }
 
@@ -256,10 +268,11 @@ public class BibliotecaApp {
     }
 
     public ArrayList<Book> getCheckedOutBooks(User user) {
+        this.printer.println(user);
         ArrayList<Book> checkedoutBooks = new ArrayList<>();
         if (this.checkoutRecord.containsKey(user)) {
             for (LibraryItem item : this.checkoutRecord.get(user)) {
-                if (Book.class.isInstance(item)) {
+                if (item.getClass() == Book.class) {
                     checkedoutBooks.add((Book) item);
                 }
             }
