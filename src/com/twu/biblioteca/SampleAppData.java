@@ -40,6 +40,10 @@ public class SampleAppData {
 
     public ArrayList<User> getUsers() {
         User testUser1 = new User("123-4567", "password");
-        return new ArrayList<User>() { { add(testUser1); }};
+        User testUser2 = new User("000-0000", "password2");
+        return new ArrayList<User>() { {
+            add(testUser1);
+            add(testUser2);
+        }};
     }
 }
