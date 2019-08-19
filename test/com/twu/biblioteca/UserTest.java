@@ -21,6 +21,9 @@ public class UserTest {
     })
     public void testInvalidUsernames(String username) {
         String password = "fakepassword";
-        User validUser = new User(username, password);
+        String name = "John Doe";
+        String email = "jd@gmail.com";
+        String phone = "0325218349";
+        User validUser = new User(username, password, name, email, phone);
     }
 }

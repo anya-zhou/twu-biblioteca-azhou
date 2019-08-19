@@ -135,6 +135,7 @@ public class BibliotecaAppTest {
         verify(mockOut).println(BibliotecaApp.LIST_MOVIES_KEY + ". List of movies");
         verify(mockOut).println(BibliotecaApp.CHECK_OUT_MOVIE_KEY + ". Check-out a movie");
         verify(mockOut).println(BibliotecaApp.VIEW_CHECKED_OUT_BOOKS_KEY + ". View books checked out");
+        verify(mockOut).println(BibliotecaApp.VIEW_USER_INFO + ". View my information");
         verify(mockOut).println(BibliotecaApp.EXIT_APP_KEY + ". Exit the application");
     }
 
@@ -412,6 +413,25 @@ public class BibliotecaAppTest {
             }
             fieldIndex += 5;
         }
+    }
+
+    @Test
+    public void testViewUserInfoValidLogin() throws IOException {
+        when(mockReader.readLine()).thenReturn(userId).thenReturn(password);
+
+        // When
+        bibliotecaApp.executeUserSelectedOption(BibliotecaApp.VIEW_USER_INFO);
+
+        // Then
+        verify(mockOut).println("Please enter your library number in the following format 'xxx-xxxx': ");
+        verify(mockOut).println("Please enter your password: ");
+        verify(mockOut, atLeastOnce()).println(captor.capture());
+
+        List<String> printedFields = captor.getAllValues();
+
+        assertThat(captor.getAllValues(), hasItem(containsString(testUser1.getName())));
+        assertThat(captor.getAllValues(), hasItem(containsString(testUser1.getEmail())));
+        assertThat(captor.getAllValues(), hasItem(containsString(testUser1.getPhone())));
     }
 
     @Test

@@ -8,12 +8,15 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 
 public class LoginServiceTest {
+    private String name = "test user";
+    private String email = "test@ab.cd";
+    private String phone = "342352334";
     @Test
     public void testLoginValidDetails() {
         // Given
         String username = "123-4567";
         String password = "fakepassword";
-        User validUser = new User(username, password);
+        User validUser = new User(username, password, name, email, phone);
         ArrayList<User> users = new ArrayList<User>();
         users.add(validUser);
         LoginService loginService = new LoginService(users);
@@ -28,7 +31,7 @@ public class LoginServiceTest {
         // Given
         String username = "123-4567";
         String password = "fakepassword";
-        User validUser = new User(username, password);
+        User validUser = new User(username, password, name, email, phone);
         ArrayList<User> users = new ArrayList<User>();
         users.add(validUser);
         LoginService loginService = new LoginService(users);
@@ -43,7 +46,7 @@ public class LoginServiceTest {
         // Given
         String username = "123-4567";
         String password = "fakepassword";
-        User validUser = new User(username, password);
+        User validUser = new User(username, password, name, email, phone);
         ArrayList<User> users = new ArrayList<User>();
         users.add(validUser);
         LoginService loginService = new LoginService(users);
