@@ -29,7 +29,12 @@ public class User {
     }
 
     @Override
+    public boolean equals(Object o) {
+        return this.getClass() == o.getClass() && this.getUsername().equals(((User) o).getUsername());
+    }
+
+    @Override
     public int hashCode() {
-        return Integer.parseInt(this.username.replace("-",""));
+        return this.getUsername().hashCode();
     }
 }

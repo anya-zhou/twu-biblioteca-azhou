@@ -6,10 +6,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class BibliotecaApp {
     private PrintStream printer = System.out;
@@ -127,6 +130,9 @@ public class BibliotecaApp {
                 case CHECK_OUT_MOVIE_KEY:
                     this.initiateMovieCheckout();
                     break;
+                case VIEW_CHECKED_OUT_BOOKS_KEY:
+                    this.listCheckedoutBooks();
+                    break;
                 case EXIT_APP_KEY:
                     System.exit(0);
                     break;
@@ -138,6 +144,19 @@ public class BibliotecaApp {
             this.printer.println("Please select a valid option!");
         }
         return optionExecuted;
+    }
+
+    private void listCheckedoutBooks() {
+        loggedInUser = this.loginUser();
+        if (loggedInUser != null) {
+            ArrayList<Book> checkedOutBooks = this.getCheckedOutBooks(loggedInUser);
+
+            this.printFieldStringsAsLine(bookLibrary.getHeaderStrings());
+
+            for (Book book : checkedOutBooks) {
+                this.printFieldStringsAsLine(book.getPrintableFieldStrings());
+            }
+        }
     }
 
     public void listAvailableBooks() {
@@ -209,6 +228,7 @@ public class BibliotecaApp {
         }
     }
 
+
     private void printFieldStringsAsLine(ArrayList<String> fieldStrings) {
         for (String fieldString : fieldStrings) {
             this.printer.print(formatToCol(fieldString, COL_WIDTH));
@@ -269,16 +289,14 @@ public class BibliotecaApp {
     }
 
     public ArrayList<Book> getCheckedOutBooks(User user) {
-        this.printer.println(user);
-        ArrayList<Book> checkedoutBooks = new ArrayList<>();
-        if (this.checkoutRecord.containsKey(user)) {
-            for (LibraryItem item : this.checkoutRecord.get(user)) {
-                if (item.getClass() == Book.class) {
-                    checkedoutBooks.add((Book) item);
-                }
+        ArrayList<LibraryItem> checkedOutItems = this.checkoutRecord.getOrDefault(user, new ArrayList<>());
+        ArrayList<Book> checkedOutBooks = new ArrayList<>();
+        for (LibraryItem item : checkedOutItems) {
+            if (item.getClass() == Book.class) {
+                checkedOutBooks.add((Book) item);
             }
         }
-        return checkedoutBooks;
+        return checkedOutBooks;
     }
 
     public static void main(String[] args) {
