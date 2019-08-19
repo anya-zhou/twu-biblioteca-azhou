@@ -63,23 +63,119 @@ public class BibliotecaAppTest {
             mockOut, mockReader, loginService
         );
         spyApp = spy(bibliotecaApp);
-        when(mockReader.readLine()).thenReturn(BibliotecaApp.EXIT_APP_KEY); // Default input when prompted is exit
+    }
+
+    private void testUser1LoggedIn(BibliotecaApp app) throws IOException {
+        when(mockReader.readLine()).thenReturn(userId).thenReturn(password);
+        app.loginUser();
+
+        verify(mockOut).println("Please enter your library number in the following format 'xxx-xxxx': ");
+        verify(mockOut).println("Please enter your password: ");
     }
 
     @Test
-    public void testShowWelcomeOnStarting() {
+    public void testLogin() {
+        try {
+            // Given
+            assertThat(spyApp.isLoggedIn(), is(false));
+            exit.expectSystemExit();
+            // When
+            when(mockReader.readLine()).thenReturn(BibliotecaApp.LOGIN_KEY)
+                    .thenReturn(userId).thenReturn(password).thenReturn(BibliotecaApp.POST_LOGIN_EXIT_APP_KEY);
+            spyApp.start();
+            // Then
+            verify(spyApp).loginUser();
+            assertThat(spyApp.isLoggedIn(), is(true));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testBadLogin() {
+        try {
+            // Given
+            assertThat(spyApp.isLoggedIn(), is(false));
+            exit.expectSystemExit();
+            // When
+            when(mockReader.readLine()).thenReturn(BibliotecaApp.LOGIN_KEY)
+                    .thenReturn(userId).thenReturn("badpassword").thenReturn(BibliotecaApp.PRE_LOGIN_EXIT_APP_KEY);
+            spyApp.start();
+            // Then
+            verify(spyApp).loginUser();
+            assertThat(spyApp.isLoggedIn(), is(false));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testShowWelcomeAndMenuOnStart() throws IOException {
         // Given
         final String WELCOME_MSG = "Welcome to Biblioteca. Your one-stop-shop for great book titles in Bangalore!";
-        // When
         exit.expectSystemExit();
-        bibliotecaApp.start();
+        // When
+        when(mockReader.readLine()).thenReturn(BibliotecaApp.PRE_LOGIN_EXIT_APP_KEY);
+        spyApp.start();
         // Then
         verify(mockOut).println(WELCOME_MSG);
+
+        verify(mockOut).println("Please enter the number of the option that you would like to select: ");
+        verify(mockOut).println(BibliotecaApp.PRE_LOGIN_LIST_BOOKS_KEY + ". List of books");
+        verify(mockOut).println(BibliotecaApp.PRE_LOGIN_LIST_MOVIES_KEY + ". List of movies");
+        verify(mockOut).println(BibliotecaApp.LOGIN_KEY + ". Login for more options");
+        verify(mockOut).println(BibliotecaApp.PRE_LOGIN_EXIT_APP_KEY + ". Exit the application");
+        verifyNoMoreInteractions(mockOut);
+    }
+
+    @Test
+    public void testPostLoginShowMenu() throws IOException {
+        // Given
+        testUser1LoggedIn(bibliotecaApp);
+        exit.expectSystemExit();
+        //When
+        when(mockReader.readLine()).thenReturn(BibliotecaApp.POST_LOGIN_EXIT_APP_KEY);
+        bibliotecaApp.start();
+        //Then
+        verify(mockOut).println("Please enter the number of the option that you would like to select: ");
+        verify(mockOut).println(BibliotecaApp.POST_LOGIN_LIST_BOOKS_KEY + ". List of books");
+        verify(mockOut).println(BibliotecaApp.POST_LOGIN_CHECK_OUT_BOOK_KEY + ". Check-out a book");
+        verify(mockOut).println(BibliotecaApp.POST_LOGIN_RETURN_BOOK_KEY + ". Return a book");
+        verify(mockOut).println(BibliotecaApp.POST_LOGIN_LIST_MOVIES_KEY + ". List of movies");
+        verify(mockOut).println(BibliotecaApp.POST_LOGIN_CHECK_OUT_MOVIE_KEY + ". Check-out a movie");
+        verify(mockOut).println(BibliotecaApp.POST_LOGIN_VIEW_CHECKED_OUT_BOOKS_KEY + ". View books checked out");
+        verify(mockOut).println(BibliotecaApp.POST_LOGIN_VIEW_USER_INFO_KEY + ". View my information");
+        verify(mockOut).println(BibliotecaApp.POST_LOGIN_EXIT_APP_KEY + ". Exit the application");
+    }
+
+
+    @Test
+    public void testPreLoginSelectListBookMenuOption() throws IOException {
+        // Given
+        exit.expectSystemExit();
+        // When
+        when(mockReader.readLine()).thenReturn(BibliotecaApp.PRE_LOGIN_LIST_BOOKS_KEY)
+                .thenReturn(BibliotecaApp.PRE_LOGIN_EXIT_APP_KEY);
+        spyApp.start();
+        // Then
+        verify(spyApp).listAvailableBooks();
+    }
+
+    @Test
+    public void testPostLoginSelectListBookMenuOption() throws IOException {
+        // Given
+        testUser1LoggedIn(spyApp);
+        exit.expectSystemExit();
+        // When
+        when(mockReader.readLine()).thenReturn(BibliotecaApp.POST_LOGIN_EXIT_APP_KEY);
+        spyApp.start();
+        // Then
+        verify(spyApp).listAvailableBooks();
     }
 
     @Test
     public void testListAllBooks() {
-        // Given - populate library with some dummy books from SampleAppData
+        // Given
         ArrayList<Book> testBooks = sampleData.getBookLibrary().getItems();
 
         // When
@@ -108,11 +204,6 @@ public class BibliotecaAppTest {
         }
     }
 
-    private void verifyPrintIgnoreTrailingBlanks(String s) {
-        verify(mockOut, atLeastOnce()).print(captor.capture());
-        assertThat(captor.getAllValues(), hasItem(containsString(s)));
-    }
-
     @Test
     public void testPrintNothingForEmptyLibrary() {
         // Given - empty library as no library passed in through the constructor
@@ -124,101 +215,35 @@ public class BibliotecaAppTest {
     }
 
     @Test
-    public void testShowMenu() {
-        // When
-        bibliotecaApp.showMenu();
-        //Then
-        verify(mockOut).println("Please enter the number of the option that you would like to select: ");
-        verify(mockOut).println(BibliotecaApp.LIST_BOOKS_KEY + ". List of books");
-        verify(mockOut).println(BibliotecaApp.CHECK_OUT_BOOK_KEY + ". Check-out a book");
-        verify(mockOut).println(BibliotecaApp.RETURN_BOOK_KEY + ". Return a book");
-        verify(mockOut).println(BibliotecaApp.LIST_MOVIES_KEY + ". List of movies");
-        verify(mockOut).println(BibliotecaApp.CHECK_OUT_MOVIE_KEY + ". Check-out a movie");
-        verify(mockOut).println(BibliotecaApp.VIEW_CHECKED_OUT_BOOKS_KEY + ". View books checked out");
-        verify(mockOut).println(BibliotecaApp.VIEW_USER_INFO + ". View my information");
-        verify(mockOut).println(BibliotecaApp.EXIT_APP_KEY + ". Exit the application");
-    }
-
-    @Test
-    public void testSelectListBookMenuOption() {
-        // When
-        spyApp.executeUserSelectedOption(BibliotecaApp.LIST_BOOKS_KEY);
-        // Then
-        verify(spyApp).listAvailableBooks();
-    }
-
-    @Test
-    public void testCheckoutBookMenuOptionValidUserInputs() throws IOException {
+    public void testPostLoginBookCheckoutOption() throws IOException {
         // Given
-        Book checkoutBook = sampleData.getBookLibrary().getItems().get(0);
-        when(mockReader.readLine()).thenReturn(userId)
-                .thenReturn(password).thenReturn(checkoutBook.getId()); // Attempt to checkout the first book on the list
+        testUser1LoggedIn(spyApp);
+        ArrayList<Book> testBooks = sampleData.getBookLibrary().getItems();
+        Book checkoutBook = testBooks.get(0);
+        exit.expectSystemExit();
         // When
-        spyApp.executeUserSelectedOption(BibliotecaApp.CHECK_OUT_BOOK_KEY);
+        when(mockReader.readLine()).thenReturn(BibliotecaApp.POST_LOGIN_CHECK_OUT_BOOK_KEY)
+            .thenReturn(checkoutBook.getId())   // Attempt to checkout the first book on the list
+                .thenReturn(BibliotecaApp.POST_LOGIN_EXIT_APP_KEY);
+        spyApp.start();
         // Then
-        // prompts for user log in
-        // prompt user to select which one to checkout, invoke checkout on selected book
-        verify(mockOut).println("Please enter your library number in the following format 'xxx-xxxx': ");
-        verify(mockOut).println("Please enter your password: ");
         verify(mockOut).println("Please enter the ID of the book that you would like to check-out: ");
         verify(spyApp).checkoutBook(checkoutBook.getId());
-        assertThat(spyApp.getCheckedOutBooks(spyApp.getUser(userId)), hasItem(is(checkoutBook)));
     }
 
     @Test
-    public void testCheckoutBookMenuOptionInvalidUserInputs() throws IOException {
+    public void testCheckoutBookSuccessful() throws IOException {
         // Given
-        Book checkoutBook = sampleData.getBookLibrary().getItems().get(0);
-        when(mockReader.readLine()).thenReturn(userId)
-                .thenReturn("badpassword").thenReturn(checkoutBook.getId()); // Attempt to checkout with bad login details
+        Book testCheckoutBook = sampleData.getBookLibrary().getItems().get(0);
         // When
-        spyApp.executeUserSelectedOption(BibliotecaApp.CHECK_OUT_BOOK_KEY);
+        bibliotecaApp.checkoutBook(testCheckoutBook.getId());
         // Then
-        // prompts for user log in, when log in is bad should NOT proceed to allowing user to checkout a book
-        verify(mockOut).println("Please enter your library number in the following format 'xxx-xxxx': ");
-        verify(mockOut).println("Please enter your password: ");
-        verify(mockOut, times(0)).println("Please enter the ID of the book that you would like to check-out: ");
-        assertThat(spyApp.getCheckedOutBooks(spyApp.getUser(userId)), not(hasItem(is(checkoutBook))));
-    }
-
-
-    @Test
-    public void testSelectCheckoutMovieMenuOption() throws IOException {
-        // Given
-
-        String checkoutMovieId = sampleData.getMovieLibrary().getItems().get(0).getId();
-        when(mockReader.readLine()).thenReturn(checkoutMovieId); // Attempt to checkout the first book on the list
-        // When
-        spyApp.executeUserSelectedOption(BibliotecaApp.CHECK_OUT_MOVIE_KEY);
-        // Then - list all books, prompt user to select which one to checkout, invoke checkout on selected book
-        verify(mockOut).println("Please enter the ID of the movie that you would like to check-out: ");
-        verify(spyApp).checkoutMovie(checkoutMovieId);
-    }
-
-    @Test
-    public void testSuccessfulCheckoutBook() throws IOException {
-        // Given - attempt to checkout an existing book at index 0
-        ArrayList<Book> testBooks = sampleData.getBookLibrary().getItems();
-        String checkoutBookId = testBooks.get(0).getId();
-        // When
-        bibliotecaApp.checkoutBook(checkoutBookId);
-        bibliotecaApp.listAvailableBooks();
-        // Then
-        // 1. Should show success message
-        // 2. Checked out book should NOT be listed after
         verify(mockOut).println("Thank you! Enjoy the book");
 
-        for (int i = 1; i < testBooks.size(); i++) {    // Should skip first book at 0 since it's checked out
-            verifyPrintIgnoreTrailingBlanks(testBooks.get(i).getTitle());
-        }
-    }
-
-    @Test
-    public void testUnsuccessfulCheckoutNoSuchBook() throws IOException {
         // When
-        bibliotecaApp.checkoutBook("Bad ID");
-        // Then
-        verify(mockOut).println("Sorry, that book is not available");
+        bibliotecaApp.listAvailableBooks();
+        //Then
+        verify(mockOut, times(0)).print(containsString(testCheckoutBook.getTitle()));
     }
 
     @Test
@@ -226,30 +251,123 @@ public class BibliotecaAppTest {
         // Given - attempt to checkout an book that was already checked out
         Book testCheckoutBook = sampleData.getBookLibrary().getItems().get(0);
         testCheckoutBook.checkOut();  // ensure it's already checked out
-
         // When
         bibliotecaApp.checkoutBook(testCheckoutBook.getId());
         // Then
         verify(mockOut).println("Sorry, that book is not available");
     }
 
+    @Test
+    public void testCheckoutBookMenuOptionInvalidBookId() throws IOException {
+        // When
+        bibliotecaApp.checkoutBook("Bad ID");
+        // Then
+        verify(mockOut).println("Sorry, that book is not available");
+    }
+
+
+    @Test
+    public void testReturnBooksOption() throws IOException {
+        // Given
+        testUser1LoggedIn(spyApp);
+        exit.expectSystemExit();
+        // When
+        when(mockReader.readLine()).thenReturn(BibliotecaApp.POST_LOGIN_RETURN_BOOK_KEY)
+                .thenReturn(BibliotecaApp.POST_LOGIN_EXIT_APP_KEY);
+        spyApp.start();
+        // Then
+        verify(spyApp).initiateBookReturn();
+    }
+
+    @Test
+    public void testReturnBookMenuOptionValidUserInputs() throws IOException {
+        testUser1LoggedIn(spyApp);
+        Book checkedOutBook = sampleData.getBookLibrary().getItems().get(0);
+        spyApp.recordCheckout(testUser1, checkedOutBook);  // ensure it's checked out
+        when(mockReader.readLine()).thenReturn(checkedOutBook.getId()); // Attempt to return that book when prompted
+        // When
+        spyApp.initiateBookReturn();
+        // Then - prompt user to select which one to return, invoke return
+        // prompt user to select which one to return, remove it from user's checkout record
+        verify(mockOut).println("Please enter the ID of the book that you would like to return: ");
+        verify(spyApp).returnBook(testUser1, checkedOutBook.getId());
+        assertThat(spyApp.getCheckedOutBooks(testUser1), not(hasItem(checkedOutBook)));
+    }
+
+    @Test
+    public void testSuccessfulReturn() throws IOException {
+        // Given
+        testUser1LoggedIn(bibliotecaApp);
+        ArrayList<Book> testBooks = sampleData.getBookLibrary().getItems();
+        Book checkoutBook = testBooks.get(0);
+        bibliotecaApp.recordCheckout(testUser1, checkoutBook);    // ensure it's checked out
+
+        // When
+        bibliotecaApp.returnBook(testUser1, checkoutBook.getId());
+        bibliotecaApp.listAvailableBooks();
+
+        // Then
+        verify(mockOut, atLeastOnce()).print(captor.capture());
+        assertThat(captor.getAllValues(), hasItem(containsString(checkoutBook.getTitle())));
+        verify(mockOut).println("Thank you for returning the book");
+    }
+
+    @Test
+    public void testUnsuccessfulReturnNoSuchBook() {
+        // When
+        bibliotecaApp.returnBook(testUser1,"Bad ID");
+        // Then
+        verify(mockOut).println("That is not a valid book to return.");
+    }
+
+    @Test
+    public void testUnsuccessfulReturnCheckedOutByDifferentUser() throws IOException {
+        // Given
+        testUser1LoggedIn(bibliotecaApp);
+        ArrayList<Book> testBooks = sampleData.getBookLibrary().getItems();
+        Book checkoutBook = testBooks.get(0);
+        bibliotecaApp.recordCheckout(testUser2, checkoutBook);    // real book but checked out by a DIFFERENT USER
+
+        // When - original user tries to return the same book
+        bibliotecaApp.returnBook(testUser1, checkoutBook.getId());
+        bibliotecaApp.listAvailableBooks();
+
+        // Then
+        verify(mockOut).println("That is not a valid book to return.");
+        assertThat(bibliotecaApp.getCheckedOutBooks(testUser2), hasItem(checkoutBook));
+    }
+
+    @Test
+    public void testPostLoginSelectCheckoutMovieMenuOption() throws IOException {
+        // Given
+        testUser1LoggedIn(spyApp);
+        String checkoutMovieId = sampleData.getMovieLibrary().getItems().get(0).getId();
+        exit.expectSystemExit();
+        // When
+        when(mockReader.readLine()).thenReturn(BibliotecaApp.POST_LOGIN_CHECK_OUT_MOVIE_KEY)
+                .thenReturn(checkoutMovieId)   // Attempt to checkout the first movie on the list
+                .thenReturn(BibliotecaApp.POST_LOGIN_EXIT_APP_KEY);
+        spyApp.start();
+        // Then
+        verify(mockOut).println("Please enter the ID of the movie that you would like to check-out: ");
+        verify(spyApp).checkoutMovie(checkoutMovieId);
+    }
 
     @Test
     public void testSuccessfulCheckoutMovie() throws IOException {
         // Given - attempt to checkout an existing book at index 0
         ArrayList<Movie> testMovies = sampleData.getMovieLibrary().getItems();
-        String checkoutMovieId = testMovies.get(0).getId();
+        Movie checkedOutMovie = testMovies.get(0);
         // When
-        bibliotecaApp.checkoutMovie(checkoutMovieId);
+        bibliotecaApp.checkoutMovie(checkedOutMovie.getId());
         bibliotecaApp.listAvailableMovies();
         // Then
-        // 1. Should show success message
-        // 2. Checked out book should NOT be listed after
         verify(mockOut).println("Thank you! Enjoy the movie");
 
-        for (int i = 1; i < testMovies.size(); i++) {    // Should skip first book at 0 since it's checked out
-            verifyPrintIgnoreTrailingBlanks(testMovies.get(i).getName());
-        }
+        // When
+        bibliotecaApp.listAvailableMovies();
+        // Then
+        verify(mockOut, times(0)).println(containsString(checkedOutMovie.getName()));
     }
 
     @Test
@@ -265,112 +383,17 @@ public class BibliotecaAppTest {
         // Given - attempt to checkout an book that was already checked out
         Movie testCheckoutMovie = sampleData.getMovieLibrary().getItems().get(0);
         testCheckoutMovie.checkOut();  // ensure it's already checked out
-
         // When
         bibliotecaApp.checkoutMovie(testCheckoutMovie.getId());
         // Then
         verify(mockOut).println("Sorry, that movie is not available");
     }
 
-    @Test
-    public void testShowMenuAndGetSelectionOnStarting() {
-        // Given
-
-        // When
-        exit.expectSystemExit();
-        spyApp.start();
-        // Then
-        verify(spyApp).showMenu();
-        verify(spyApp).executeUserSelectedOption((String) any());
-    }
-
-    @Test
-    public void testReturnBooksOption() {
-        // When
-        spyApp.executeUserSelectedOption(BibliotecaApp.RETURN_BOOK_KEY);
-        // Then
-        verify(spyApp).initiateBookReturn();
-    }
-
-    @Test
-    public void testReturnBookMenuOptionValidUserInputs() throws IOException {
-        Book checkedOutBook = sampleData.getBookLibrary().getItems().get(0);
-        spyApp.recordCheckout(testUser1, checkedOutBook);  // ensure it's checked out
-        when(mockReader.readLine()).thenReturn(userId).thenReturn(password)
-            .thenReturn(checkedOutBook.getId()); // Attempt to return that book when prompted
-        // When
-        spyApp.initiateBookReturn();
-        // Then - prompt user to select which one to return, invoke return
-        // prompts for user log in
-        // prompt user to select which one to return, remove it from user's checkout record
-        verify(mockOut).println("Please enter your library number in the following format 'xxx-xxxx': ");
-        verify(mockOut).println("Please enter your password: ");
-        verify(mockOut).println("Please enter the ID of the book that you would like to return: ");
-
-        assertThat(spyApp.getCheckedOutBooks(testUser1), not(hasItem(checkedOutBook)));
-    }
-
-    @Test
-    public void testReturnBookMenuOptionInvalidUserInputs() throws IOException {
-        Book checkedOutBook = sampleData.getBookLibrary().getItems().get(0);
-        spyApp.recordCheckout(testUser1, checkedOutBook);  // ensure it's checked out
-        when(mockReader.readLine()).thenReturn(userId).thenReturn("badpassword");
-        // When
-        spyApp.initiateBookReturn();
-        // Then - prompt user to select which one to return, invoke return
-        // prompts for user log in
-        // on login error, should not continue with return process
-        verify(mockOut).println("Please enter your library number in the following format 'xxx-xxxx': ");
-        verify(mockOut).println("Please enter your password: ");
-        verify(mockOut, times(0)).println("Please enter the ID of the book that you would like to return: ");
-    }
-
-    @Test
-    public void testSuccessfulReturn() {
-        // Given
-        ArrayList<Book> testBooks = sampleData.getBookLibrary().getItems();
-        Book checkoutBook = testBooks.get(0);
-        bibliotecaApp.recordCheckout(testUser1, checkoutBook);    // ensure it's checked out
-
-        // When
-        bibliotecaApp.returnBook(testUser1, checkoutBook.getId());
-        bibliotecaApp.listAvailableBooks();
-        // Then
-        // 1. Returned book should show in the list
-        // 2. Should show success message
-        int numColumns = testBooks.get(0).getPrintableHeaders().size();
-        int totalExpectedFields = numColumns * (testBooks.size() + 1);
-        verify(mockOut, times(totalExpectedFields)).print(captor.capture());
-        assertThat(captor.getAllValues(), hasItem(containsString(checkoutBook.getTitle())));
-        verify(mockOut).println("Thank you for returning the book");
-    }
-
-    @Test
-    public void testUnsuccessfulReturnNoSuchBook() {
-        // When
-        bibliotecaApp.returnBook(testUser1,"Bad ID");
-        // Then
-        verify(mockOut).println("That is not a valid book to return.");
-    }
-
-    @Test
-    public void testUnsuccessfulReturnNotCheckedOutBySameUser() {
-        // Given
-        ArrayList<Book> testBooks = sampleData.getBookLibrary().getItems();
-        Book checkoutBook = testBooks.get(0);
-        bibliotecaApp.recordCheckout(testUser2, checkoutBook);    // real book but checked out by a DIFFERENT USER
-
-        // When
-        bibliotecaApp.returnBook(testUser1, checkoutBook.getId());
-        bibliotecaApp.listAvailableBooks();
-        // Then
-        verify(mockOut).println("That is not a valid book to return.");
-    }
 
     @Test
     public void testGetNotifiedOnInvalidOption() throws IOException {
         // Given - one invalid selection before a valid one
-        when(mockReader.readLine()).thenReturn("100").thenReturn(BibliotecaApp.EXIT_APP_KEY);
+        when(mockReader.readLine()).thenReturn("100").thenReturn(BibliotecaApp.PRE_LOGIN_EXIT_APP_KEY);
         // When
         exit.expectSystemExit();
         bibliotecaApp.start(); // valid option does not include 100
@@ -384,7 +407,7 @@ public class BibliotecaAppTest {
         ArrayList<Movie> testMovies = sampleData.getMovieLibrary().getItems();
 
         // When
-        spyApp.executeUserSelectedOption(BibliotecaApp.LIST_MOVIES_KEY);
+        spyApp.executeLoggedInOption(BibliotecaApp.POST_LOGIN_LIST_MOVIES_KEY);
 
         // Then
         int numColumns = sampleData.getMovieLibrary().getHeaderStrings().size();
@@ -417,14 +440,16 @@ public class BibliotecaAppTest {
 
     @Test
     public void testViewUserInfoValidLogin() throws IOException {
-        when(mockReader.readLine()).thenReturn(userId).thenReturn(password);
+        //Given
+        testUser1LoggedIn(spyApp);
+        exit.expectSystemExit();
 
         // When
-        bibliotecaApp.executeUserSelectedOption(BibliotecaApp.VIEW_USER_INFO);
+        when(mockReader.readLine()).thenReturn(BibliotecaApp.POST_LOGIN_VIEW_USER_INFO_KEY)
+            .thenReturn(BibliotecaApp.POST_LOGIN_EXIT_APP_KEY);
+        spyApp.start();
 
         // Then
-        verify(mockOut).println("Please enter your library number in the following format 'xxx-xxxx': ");
-        verify(mockOut).println("Please enter your password: ");
         verify(mockOut, atLeastOnce()).println(captor.capture());
 
         List<String> printedFields = captor.getAllValues();
@@ -436,63 +461,40 @@ public class BibliotecaAppTest {
 
     @Test
     public void testViewCheckedOutBooksValidLogin() throws IOException {
-        // Given - check out the first book, then attempt to view user's checked out book record
+        //Given
+        testUser1LoggedIn(spyApp);
         ArrayList<Book> testBooks = sampleData.getBookLibrary().getItems();
         Book checkoutBook = testBooks.get(0);
-        bibliotecaApp.recordCheckout(testUser1, checkoutBook);
-        when(mockReader.readLine()).thenReturn(userId).thenReturn(password);
+        spyApp.recordCheckout(testUser1, checkoutBook);
+        exit.expectSystemExit();
 
         // When
-        bibliotecaApp.executeUserSelectedOption(BibliotecaApp.VIEW_CHECKED_OUT_BOOKS_KEY);
+        when(mockReader.readLine()).thenReturn(BibliotecaApp.POST_LOGIN_VIEW_CHECKED_OUT_BOOKS_KEY)
+                .thenReturn(BibliotecaApp.POST_LOGIN_EXIT_APP_KEY);
+        spyApp.start();
 
         // Then
-        verify(mockOut).println("Please enter your library number in the following format 'xxx-xxxx': ");
-        verify(mockOut).println("Please enter your password: ");
         verify(mockOut, atLeastOnce()).print(captor.capture());
-
-        List<String> printedFields = captor.getAllValues();
-
         assertThat(captor.getAllValues(), hasItem(containsString(checkoutBook.getTitle())));
     }
 
     @Test
-    public void testViewCheckedOutBooksInvalidLogin() throws IOException {
-        // Given - check out the first book, then attempt to view user's checked out book record
-        ArrayList<Book> testBooks = sampleData.getBookLibrary().getItems();
-        Book checkoutBook = testBooks.get(0);
-        bibliotecaApp.recordCheckout(testUser1, checkoutBook);
-        when(mockReader.readLine()).thenReturn(userId).thenReturn("badpassword");
-
-        // When
-        bibliotecaApp.executeUserSelectedOption(BibliotecaApp.VIEW_CHECKED_OUT_BOOKS_KEY);
-
-        // Then
-        verify(mockOut).println("Please enter your library number in the following format 'xxx-xxxx': ");
-        verify(mockOut).println("Please enter your password: ");
-        verify(mockOut, times(0)).print(containsString(checkoutBook.getTitle()));
-    }
-
-    @Test
-    public void testViewCheckedOutBooksCannotViewAnotherUser() throws IOException {
-        // Given - check out the first book, then attempt to view user's checked out book record
-        ArrayList<Book> testBooks = sampleData.getBookLibrary().getItems();
-        Book checkoutBook = testBooks.get(0);
-        bibliotecaApp.recordCheckout(testUser1, checkoutBook);
-        when(mockReader.readLine()).thenReturn(testUser2.getUsername()).thenReturn(testUser2.getPassword());
-
-        // When
-        bibliotecaApp.executeUserSelectedOption(BibliotecaApp.VIEW_CHECKED_OUT_BOOKS_KEY);
-
-        // Then
-        verify(mockOut).println("Please enter your library number in the following format 'xxx-xxxx': ");
-        verify(mockOut).println("Please enter your password: ");
-        verify(mockOut, times(0)).print(containsString(checkoutBook.getTitle()));
-    }
-
-    @Test
-    public void testExitOption() throws IOException {
+    public void testPreLoginExitOption() throws IOException {
         // Given
-        when(mockReader.readLine()).thenReturn(BibliotecaApp.EXIT_APP_KEY);
+        when(mockReader.readLine()).thenReturn(BibliotecaApp.PRE_LOGIN_EXIT_APP_KEY);
+        exit.expectSystemExit(); // Prevents System.exit from existing the JVM
+        // When
+        bibliotecaApp.start();
+        // Then - should not prompt for user input again
+        verify(mockReader, times(1)).readLine();
+        verifyNoMoreInteractions(mockReader);
+    }
+
+    @Test
+    public void testPostLoginExitOption() throws IOException {
+        // Given
+        testUser1LoggedIn(bibliotecaApp);
+        when(mockReader.readLine()).thenReturn(BibliotecaApp.POST_LOGIN_EXIT_APP_KEY);
         exit.expectSystemExit(); // Prevents System.exit from existing the JVM
         // When
         bibliotecaApp.start();
@@ -504,8 +506,8 @@ public class BibliotecaAppTest {
     @Test
     public void testLoopWhenNoExitSelected() throws IOException {
         // Given
-        when(mockReader.readLine()).thenReturn(BibliotecaApp.LIST_BOOKS_KEY)
-                .thenReturn(BibliotecaApp.LIST_BOOKS_KEY).thenReturn(BibliotecaApp.EXIT_APP_KEY);
+        when(mockReader.readLine()).thenReturn(BibliotecaApp.PRE_LOGIN_LIST_BOOKS_KEY)
+                .thenReturn(BibliotecaApp.PRE_LOGIN_LIST_BOOKS_KEY).thenReturn(BibliotecaApp.PRE_LOGIN_EXIT_APP_KEY);
         exit.expectSystemExit(); // Prevents System.exit from existing the JVM
         // When
         spyApp.start();

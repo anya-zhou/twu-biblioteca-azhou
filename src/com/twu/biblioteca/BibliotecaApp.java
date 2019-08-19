@@ -1,18 +1,12 @@
 package com.twu.biblioteca;
 
-import sun.rmi.runtime.Log;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 public class BibliotecaApp {
     private PrintStream printer = System.out;
@@ -27,27 +21,55 @@ public class BibliotecaApp {
     static final String COL_DIV = "  ";
     static final int COL_WIDTH = 30;
     private static final int ID_COL_WIDTH = 5;
-    public static final String LIST_BOOKS_KEY = "1";
-    public static final String CHECK_OUT_BOOK_KEY = "2";
-    public static final String RETURN_BOOK_KEY = "3";
-    public static final String LIST_MOVIES_KEY = "4";
-    public static final String CHECK_OUT_MOVIE_KEY = "5";
-    public static final String VIEW_USER_INFO = "6";
-    public static final String VIEW_CHECKED_OUT_BOOKS_KEY = "7";
-    public static final String EXIT_APP_KEY = "8";
 
-    static final Map<String, String> menu = new HashMap<String, String>() {
-        {
-            put(LIST_BOOKS_KEY, "List of books");
-            put(CHECK_OUT_BOOK_KEY, "Check-out a book");
-            put(RETURN_BOOK_KEY, "Return a book");
-            put(LIST_MOVIES_KEY, "List of movies");
-            put(CHECK_OUT_MOVIE_KEY, "Check-out a movie");
-            put(VIEW_CHECKED_OUT_BOOKS_KEY, "View books checked out");
-            put(VIEW_USER_INFO, "View my information");
-            put(EXIT_APP_KEY, "Exit the application");
+    private Map<String, String> preLoginMenu;
+    private Map<String, String> postLoginMenu;
+
+
+    public static final String PRE_LOGIN_LIST_BOOKS_KEY = "1";
+    public static final String PRE_LOGIN_LIST_MOVIES_KEY = "2";
+    public static final String LOGIN_KEY = "3";
+    public static final String PRE_LOGIN_EXIT_APP_KEY = "4";
+
+    public static final String POST_LOGIN_LIST_BOOKS_KEY = "1";
+    public static final String POST_LOGIN_CHECK_OUT_BOOK_KEY = "2";
+    public static final String POST_LOGIN_RETURN_BOOK_KEY = "3";
+    public static final String POST_LOGIN_LIST_MOVIES_KEY = "4";
+    public static final String POST_LOGIN_CHECK_OUT_MOVIE_KEY = "5";
+    public static final String POST_LOGIN_VIEW_USER_INFO_KEY = "6";
+    public static final String POST_LOGIN_VIEW_CHECKED_OUT_BOOKS_KEY = "7";
+    public static final String POST_LOGIN_EXIT_APP_KEY = "8";
+
+    public Map<String, String> getMenu() {
+        if (isLoggedIn()) {
+            if (this.postLoginMenu == null) {
+                this.postLoginMenu = new HashMap<String, String>() {
+                    {
+                        put(POST_LOGIN_LIST_BOOKS_KEY, "List of books");
+                        put(POST_LOGIN_CHECK_OUT_BOOK_KEY, "Check-out a book");
+                        put(POST_LOGIN_RETURN_BOOK_KEY, "Return a book");
+                        put(POST_LOGIN_LIST_MOVIES_KEY, "List of movies");
+                        put(POST_LOGIN_CHECK_OUT_MOVIE_KEY, "Check-out a movie");
+                        put(POST_LOGIN_VIEW_CHECKED_OUT_BOOKS_KEY, "View books checked out");
+                        put(POST_LOGIN_VIEW_USER_INFO_KEY, "View my information");
+                        put(POST_LOGIN_EXIT_APP_KEY, "Exit the application");
+                    }
+                };
+            }
+            return this.postLoginMenu;
         }
-    };
+        if (this.preLoginMenu == null) {
+            this.preLoginMenu = new HashMap<String, String>() {
+                {
+                    put(PRE_LOGIN_LIST_BOOKS_KEY, "List of books");
+                    put(PRE_LOGIN_LIST_MOVIES_KEY, "List of movies");
+                    put(LOGIN_KEY, "Login for more options");
+                    put(PRE_LOGIN_EXIT_APP_KEY, "Exit the application");
+                }
+            };
+        }
+        return this.preLoginMenu;
+    }
 
     public BibliotecaApp(PrintStream printer, BufferedReader reader, LoginService loginService) {
         this.printer = printer;
@@ -97,7 +119,10 @@ public class BibliotecaApp {
         try {
             this.printer.print("Select option: ");
             String userInput = this.reader.readLine();
-            return this.executeUserSelectedOption(userInput);
+            if (this.loggedInUser == null) {
+                return this.executePreLoginOption(userInput);
+            }
+            return this.executeLoggedInOption(userInput);
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -106,39 +131,67 @@ public class BibliotecaApp {
 
     public void showMenu() {
         this.printer.println("Please enter the number of the option that you would like to select: ");
-        for (Map.Entry<String, String> menuOption : menu.entrySet()) {
+        for (Map.Entry<String, String> menuOption : this.getMenu().entrySet()) {
             this.printer.println(menuOption.getKey() + ". " + menuOption.getValue());
         }
     }
 
-    public boolean executeUserSelectedOption(String userInput) {
+    public boolean executePreLoginOption(String userInput) {
         boolean optionExecuted = false;
-        if (menu.containsKey(userInput)) {
+        if (this.getMenu().containsKey(userInput)) {
             switch(userInput) {
                 // Assumes unsuccessful action returns user to the main menu, if checkout sub-process should be
                 // repeated then this method requires additional while loop
-                case LIST_BOOKS_KEY:
+                case PRE_LOGIN_LIST_BOOKS_KEY:
                     this.listAvailableBooks();
                     break;
-                case CHECK_OUT_BOOK_KEY:
-                    this.initiateBookCheckout();
-                    break;
-                case RETURN_BOOK_KEY:
-                    this.initiateBookReturn();
-                    break;
-                case LIST_MOVIES_KEY:
+                case PRE_LOGIN_LIST_MOVIES_KEY:
                     this.listAvailableMovies();
                     break;
-                case CHECK_OUT_MOVIE_KEY:
+                case LOGIN_KEY:
+                    this.loginUser();
+                    break;
+                case PRE_LOGIN_EXIT_APP_KEY:
+                    System.exit(0);
+                    break;
+            }
+            optionExecuted = true;
+
+        } else {
+            // Invalid menu option entered by user
+            this.printer.println("Please select a valid option!");
+        }
+        return optionExecuted;
+    }
+
+    public boolean executeLoggedInOption(String userInput) {
+        boolean optionExecuted = false;
+        if (this.getMenu().containsKey(userInput)) {
+            switch(userInput) {
+                // Assumes unsuccessful action returns user to the main menu, if checkout sub-process should be
+                // repeated then this method requires additional while loop
+                case POST_LOGIN_LIST_BOOKS_KEY:
+                    this.listAvailableBooks();
+                    break;
+                case POST_LOGIN_CHECK_OUT_BOOK_KEY:
+                    this.initiateBookCheckout();
+                    break;
+                case POST_LOGIN_RETURN_BOOK_KEY:
+                    this.initiateBookReturn();
+                    break;
+                case POST_LOGIN_LIST_MOVIES_KEY:
+                    this.listAvailableMovies();
+                    break;
+                case POST_LOGIN_CHECK_OUT_MOVIE_KEY:
                     this.initiateMovieCheckout();
                     break;
-                case VIEW_CHECKED_OUT_BOOKS_KEY:
+                case POST_LOGIN_VIEW_CHECKED_OUT_BOOKS_KEY:
                     this.listCheckedoutBooks();
                     break;
-                case VIEW_USER_INFO:
+                case POST_LOGIN_VIEW_USER_INFO_KEY:
                     this.showUserInformation();
                     break;
-                case EXIT_APP_KEY:
+                case POST_LOGIN_EXIT_APP_KEY:
                     System.exit(0);
                     break;
             }
@@ -152,8 +205,7 @@ public class BibliotecaApp {
     }
 
     private void listCheckedoutBooks() {
-        loggedInUser = this.loginUser();
-        if (loggedInUser != null) {
+        if (isLoggedIn()) {
             ArrayList<Book> checkedOutBooks = this.getCheckedOutBooks(loggedInUser);
 
             this.printFieldStringsAsLine(bookLibrary.getHeaderStrings());
@@ -173,20 +225,20 @@ public class BibliotecaApp {
     }
 
     public void initiateBookCheckout() {
-        loggedInUser = this.loginUser();
-        if (loggedInUser != null) {
+        if (isLoggedIn()) {
             String itemId = getItemIdFromUser("check-out", bookLibrary.getItemDescription());
             this.checkoutBook(itemId);
         }
     }
 
-    private User loginUser() {
+    public User loginUser() {
         try {
             this.printer.println("Please enter your library number in the following format 'xxx-xxxx': ");
             String username = this.reader.readLine();
             this.printer.println("Please enter your password: ");
             String password = this.reader.readLine();
-            return loginService.login(username, password);
+            this.loggedInUser = loginService.login(username, password);
+            return loggedInUser;
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -212,10 +264,13 @@ public class BibliotecaApp {
     }
 
     public void initiateBookReturn() {
-        loggedInUser = this.loginUser();
-        if (loggedInUser != null) {
+        if (isLoggedIn()) {
             this.initiateReturn(bookLibrary);
         }
+    }
+
+    public boolean isLoggedIn() {
+        return loggedInUser != null;
     }
 
     public void initiateReturn(Library library) {
@@ -305,8 +360,7 @@ public class BibliotecaApp {
     }
 
     public void showUserInformation() {
-        loggedInUser = this.loginUser();
-        if (loggedInUser != null) {
+        if (isLoggedIn()) {
             this.printer.println("Name: " + loggedInUser.getName());
             this.printer.println("E-mail: " + loggedInUser.getEmail());
             this.printer.println("Phone: " + loggedInUser.getPhone());
