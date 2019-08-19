@@ -301,30 +301,27 @@ public class BibliotecaAppTest {
         spyApp.initiateBookReturn();
         // Then - prompt user to select which one to return, invoke return
         // prompts for user log in
-        // prompt user to select which one to checkout, invoke checkout on selected book
+        // prompt user to select which one to return, remove it from user's checkout record
         verify(mockOut).println("Please enter your library number in the following format 'xxx-xxxx': ");
         verify(mockOut).println("Please enter your password: ");
         verify(mockOut).println("Please enter the ID of the book that you would like to return: ");
 
-        assertThat(spyApp.getCheckedOutBooks(testUser1), hasItem(checkedOutBook));
+        assertThat(spyApp.getCheckedOutBooks(testUser1), not(hasItem(checkedOutBook)));
     }
 
     @Test
     public void testReturnBookMenuOptionInvalidUserInputs() throws IOException {
         Book checkedOutBook = sampleData.getBookLibrary().getItems().get(0);
         spyApp.recordCheckout(testUser1, checkedOutBook);  // ensure it's checked out
-        when(mockReader.readLine()).thenReturn(userId).thenReturn("badpassword")
-                .thenReturn(checkedOutBook.getId()); // Attempt to return that book when prompted
+        when(mockReader.readLine()).thenReturn(userId).thenReturn("badpassword");
         // When
         spyApp.initiateBookReturn();
         // Then - prompt user to select which one to return, invoke return
         // prompts for user log in
-        // prompt user to select which one to checkout, invoke checkout on selected book
+        // on login error, should not continue with return process
         verify(mockOut).println("Please enter your library number in the following format 'xxx-xxxx': ");
         verify(mockOut).println("Please enter your password: ");
         verify(mockOut, times(0)).println("Please enter the ID of the book that you would like to return: ");
-
-        assertThat(spyApp.getCheckedOutBooks(spyApp.getUser(userId)), not(hasItem(checkedOutBook)));
     }
 
     @Test
@@ -415,6 +412,61 @@ public class BibliotecaAppTest {
             }
             fieldIndex += 5;
         }
+    }
+
+    @Test
+    public void testViewCheckedOutBooksValidLogin() throws IOException {
+        // Given - check out the first book, then attempt to view user's checked out book record
+        ArrayList<Book> testBooks = sampleData.getBookLibrary().getItems();
+        Book checkoutBook = testBooks.get(0);
+        bibliotecaApp.recordCheckout(testUser1, checkoutBook);
+        when(mockReader.readLine()).thenReturn(userId).thenReturn(password);
+
+        // When
+        bibliotecaApp.executeUserSelectedOption(BibliotecaApp.VIEW_CHECKED_OUT_BOOKS_KEY);
+
+        // Then
+        verify(mockOut).println("Please enter your library number in the following format 'xxx-xxxx': ");
+        verify(mockOut).println("Please enter your password: ");
+        verify(mockOut, atLeastOnce()).print(captor.capture());
+
+        List<String> printedFields = captor.getAllValues();
+
+        assertThat(captor.getAllValues(), hasItem(containsString(checkoutBook.getTitle())));
+    }
+
+    @Test
+    public void testViewCheckedOutBooksInvalidLogin() throws IOException {
+        // Given - check out the first book, then attempt to view user's checked out book record
+        ArrayList<Book> testBooks = sampleData.getBookLibrary().getItems();
+        Book checkoutBook = testBooks.get(0);
+        bibliotecaApp.recordCheckout(testUser1, checkoutBook);
+        when(mockReader.readLine()).thenReturn(userId).thenReturn("badpassword");
+
+        // When
+        bibliotecaApp.executeUserSelectedOption(BibliotecaApp.VIEW_CHECKED_OUT_BOOKS_KEY);
+
+        // Then
+        verify(mockOut).println("Please enter your library number in the following format 'xxx-xxxx': ");
+        verify(mockOut).println("Please enter your password: ");
+        verify(mockOut, times(0)).print(containsString(checkoutBook.getTitle()));
+    }
+
+    @Test
+    public void testViewCheckedOutBooksCannotViewAnotherUser() throws IOException {
+        // Given - check out the first book, then attempt to view user's checked out book record
+        ArrayList<Book> testBooks = sampleData.getBookLibrary().getItems();
+        Book checkoutBook = testBooks.get(0);
+        bibliotecaApp.recordCheckout(testUser1, checkoutBook);
+        when(mockReader.readLine()).thenReturn(testUser2.getUsername()).thenReturn(testUser2.getPassword());
+
+        // When
+        bibliotecaApp.executeUserSelectedOption(BibliotecaApp.VIEW_CHECKED_OUT_BOOKS_KEY);
+
+        // Then
+        verify(mockOut).println("Please enter your library number in the following format 'xxx-xxxx': ");
+        verify(mockOut).println("Please enter your password: ");
+        verify(mockOut, times(0)).print(containsString(checkoutBook.getTitle()));
     }
 
     @Test
