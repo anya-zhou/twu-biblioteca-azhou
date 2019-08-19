@@ -32,8 +32,9 @@ public class BibliotecaApp {
     public static final String RETURN_BOOK_KEY = "3";
     public static final String LIST_MOVIES_KEY = "4";
     public static final String CHECK_OUT_MOVIE_KEY = "5";
-    public static final String VIEW_CHECKED_OUT_BOOKS_KEY = "6";
-    public static final String EXIT_APP_KEY = "7";
+    public static final String VIEW_USER_INFO = "6";
+    public static final String VIEW_CHECKED_OUT_BOOKS_KEY = "7";
+    public static final String EXIT_APP_KEY = "8";
 
     static final Map<String, String> menu = new HashMap<String, String>() {
         {
@@ -43,6 +44,7 @@ public class BibliotecaApp {
             put(LIST_MOVIES_KEY, "List of movies");
             put(CHECK_OUT_MOVIE_KEY, "Check-out a movie");
             put(VIEW_CHECKED_OUT_BOOKS_KEY, "View books checked out");
+            put(VIEW_USER_INFO, "View my information");
             put(EXIT_APP_KEY, "Exit the application");
         }
     };
@@ -132,6 +134,9 @@ public class BibliotecaApp {
                     break;
                 case VIEW_CHECKED_OUT_BOOKS_KEY:
                     this.listCheckedoutBooks();
+                    break;
+                case VIEW_USER_INFO:
+                    this.showUserInformation();
                     break;
                 case EXIT_APP_KEY:
                     System.exit(0);
@@ -297,6 +302,15 @@ public class BibliotecaApp {
             }
         }
         return checkedOutBooks;
+    }
+
+    public void showUserInformation() {
+        loggedInUser = this.loginUser();
+        if (loggedInUser != null) {
+            this.printer.println("Name: " + loggedInUser.getName());
+            this.printer.println("E-mail: " + loggedInUser.getEmail());
+            this.printer.println("Phone: " + loggedInUser.getPhone());
+        }
     }
 
     public static void main(String[] args) {

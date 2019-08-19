@@ -39,8 +39,8 @@ public class SampleAppData {
     }
 
     public ArrayList<User> getUsers() {
-        User testUser1 = new User("123-4567", "password");
-        User testUser2 = new User("000-0000", "password2");
+        User testUser1 = new User("123-4567", "password", "User 1", "user1@mail.com", "049 837 0232");
+        User testUser2 = new User("000-0000", "password2", "User 2", "user2@abc.cd", "503-234-2356");
         return new ArrayList<User>() { {
             add(testUser1);
             add(testUser2);
