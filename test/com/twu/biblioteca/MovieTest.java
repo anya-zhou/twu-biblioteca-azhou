@@ -10,12 +10,10 @@ import static org.junit.Assert.assertThat;
 public class MovieTest {
     @Test
     public void testGetPrintableFieldStringsNoRating() {
-        // Given
-        String testTitle = "Test Title";
-        Movie testMovie = new Movie("1", testTitle, "Test Author", "1923");
-        // When
+        Movie testMovie = initializeMovieWithoutRating();
+
         ArrayList<String> bookDetails = testMovie.getPrintableFieldStrings();
-        // Then
+
         assertThat(bookDetails.get(0), is(testMovie.getId()));
         assertThat(bookDetails.get(1), is(testMovie.getName()));
         assertThat(bookDetails.get(2), is(testMovie.getYearReleased()));
@@ -23,14 +21,17 @@ public class MovieTest {
         assertThat(bookDetails.get(4), is("unrated"));
     }
 
+    private Movie initializeMovieWithoutRating() {
+        String testTitle = "Test Title";
+        return new Movie("1", testTitle, "Test Author", "1923");
+    }
+
     @Test
     public void testGetPrintableFieldStringWithRating() {
-        // Given
-        String testTitle = "Test Title";
-        Movie testMovie = new Movie("2", testTitle, "1892", "Test Director", 10);
-        // When
+        Movie testMovie = initializeMovieWithRating();
+
         ArrayList<String> bookDetails = testMovie.getPrintableFieldStrings();
-        // Then
+
         assertThat(bookDetails.get(0), is(testMovie.getId()));
         assertThat(bookDetails.get(1), is(testMovie.getName()));
         assertThat(bookDetails.get(2), is(testMovie.getYearReleased()));
@@ -38,10 +39,14 @@ public class MovieTest {
         assertThat(bookDetails.get(4), is("10"));
     }
 
+    private Movie initializeMovieWithRating() {
+        String testTitle = "Test Title";
+        return new Movie("2", testTitle, "1892", "Test Director", 10);
+    }
+
     @Test
     public void testCheckOut() {
-        //Given - initially available book
-        Movie testMovie = new Movie("1", "Test Title", "Test Author", "1923");
+        Movie testMovie = initializeMovieWithoutRating();
         assertThat(testMovie.isAvailable(), is(true));
         //When
         testMovie.checkOut();
@@ -52,7 +57,7 @@ public class MovieTest {
     @Test
     public void testReturn() {
         //Given - initially checked out book
-        Movie testMovie = new Movie("1", "Test Title", "Test Author", "1923");
+        Movie testMovie = initializeMovieWithRating();
         testMovie.checkOut();
         //When
         testMovie.returning();

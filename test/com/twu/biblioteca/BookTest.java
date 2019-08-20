@@ -10,9 +10,7 @@ import static org.hamcrest.core.Is.is;
 public class BookTest {
     @Test
     public void testGetPrintableFieldStrings() {
-        // Given
-        String testTitle = "Test Title";
-        Book testBook = new Book("1", testTitle, "Test Author", "1923");
+        Book testBook = initializeTestBook();
         // When
         ArrayList<String> bookDetails = testBook.getPrintableFieldStrings();
         // Then
@@ -25,7 +23,7 @@ public class BookTest {
     @Test
     public void testCheckOut() {
         //Given - initially available book
-        Book testBook = new Book("1", "Test Title", "Test Author", "1923");
+        Book testBook = initializeTestBook();
         assertThat(testBook.isAvailable(), is(true));
         //When
         testBook.checkOut();
@@ -36,11 +34,15 @@ public class BookTest {
     @Test
     public void testReturn() {
         //Given - initially checked out book
-        Book testBook = new Book("1", "Test Title", "Test Author", "1923");
+        Book testBook = initializeTestBook();
         testBook.checkOut();
         //When
         testBook.returning();
         //Then
         assertThat(testBook.isAvailable(), is(true));
+    }
+
+    private Book initializeTestBook() {
+        return new Book("1", "Test Title", "Test Author", "1923");
     }
 }

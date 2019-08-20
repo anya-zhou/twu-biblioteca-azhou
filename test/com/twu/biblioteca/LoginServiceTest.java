@@ -11,19 +11,24 @@ public class LoginServiceTest {
     private String name = "test user";
     private String email = "test@ab.cd";
     private String phone = "342352334";
+
     @Test
     public void testLoginValidDetails() {
         // Given
         String username = "123-4567";
         String password = "fakepassword";
         User validUser = new User(username, password, name, email, phone);
-        ArrayList<User> users = new ArrayList<User>();
-        users.add(validUser);
-        LoginService loginService = new LoginService(users);
+        LoginService loginService = initializeLoginService(validUser);
         // When
         User loggedInUser = loginService.login(username, password);
         // Then
         assertThat(loggedInUser, is(validUser));
+    }
+
+    private LoginService initializeLoginService(User validUser) {
+        ArrayList<User> users = new ArrayList<User>();
+        users.add(validUser);
+        return new LoginService(users);
     }
 
     @Test
@@ -32,9 +37,7 @@ public class LoginServiceTest {
         String username = "123-4567";
         String password = "fakepassword";
         User validUser = new User(username, password, name, email, phone);
-        ArrayList<User> users = new ArrayList<User>();
-        users.add(validUser);
-        LoginService loginService = new LoginService(users);
+        LoginService loginService = initializeLoginService(validUser);
         // When
         User loggedInUser = loginService.login(username, "wrongpassword");
         // Then
@@ -47,9 +50,7 @@ public class LoginServiceTest {
         String username = "123-4567";
         String password = "fakepassword";
         User validUser = new User(username, password, name, email, phone);
-        ArrayList<User> users = new ArrayList<User>();
-        users.add(validUser);
-        LoginService loginService = new LoginService(users);
+        LoginService loginService = initializeLoginService(validUser);
         // When
         User loggedInUser = loginService.login("765-4321", password);
         // Then

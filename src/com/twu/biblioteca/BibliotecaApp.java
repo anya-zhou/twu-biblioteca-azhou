@@ -80,12 +80,6 @@ public class BibliotecaApp {
         };
     }
 
-    BibliotecaApp(PrintStream printer, BufferedReader reader, LoginService loginService) {
-        this.printer = printer;
-        this.reader = reader;
-        this.loginService = loginService;
-    }
-
     BibliotecaApp(Library<Book> bookLibrary, Library<Movie> movieLibrary, LoginService loginService) {
         this.bookLibrary = bookLibrary;
         this.movieLibrary = movieLibrary;
