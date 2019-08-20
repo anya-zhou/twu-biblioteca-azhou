@@ -2,7 +2,7 @@ package com.twu.biblioteca;
 
 import java.util.ArrayList;
 
-public class Book extends LibraryItem{
+class Book extends LibraryItem{
     private String title;
     private String authorName;
     private String yearPublished;
@@ -15,32 +15,32 @@ public class Book extends LibraryItem{
         }
     };
 
-    public Book(String id, String title, String authorName, String yearPublished) {
+    Book(String id, String title, String authorName, String yearPublished) {
         this.id = id;
         this.title = title;
         this.authorName = authorName;
         this.yearPublished = yearPublished;
     }
 
-    public String getTitle() {
+    String getTitle() {
         return title;
     }
 
-    public String getAuthorName() {
+    String getAuthorName() {
         return this.authorName;
     }
 
-    public String getYearPublished() {
+    String getYearPublished() {
         return this.yearPublished;
     }
 
     @Override
-    public ArrayList<String> getPrintableHeaders() {
+    ArrayList<String> getPrintableHeaders() {
         return headerFields;
     }
 
     @Override
-    public ArrayList<String> getPrintableFieldStrings() {
+    ArrayList<String> getPrintableFieldStrings() {
         ArrayList<String> fieldStrings = new ArrayList<>();
         fieldStrings.add(this.getId());
         fieldStrings.add(this.getTitle());
@@ -50,7 +50,7 @@ public class Book extends LibraryItem{
     }
 
     @Override
-    public String getDescription() {
+    String getDescription() {
         return "book";
     }
 }

@@ -3,16 +3,16 @@ package com.twu.biblioteca;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-public class Library<T extends LibraryItem> {
+class Library<T extends LibraryItem> {
     private ArrayList<T> items;
     private ArrayList<String> headers = new ArrayList<>();
     private String itemDescription;
 
-    public Library() {
+    Library() {
         this.items = new ArrayList<T>();
     }
 
-    public Library(ArrayList<T> items) {
+    Library(ArrayList<T> items) {
         this.items = items;
         if (items.size() > 0) {
             itemDescription = items.get(0).getDescription();
@@ -20,11 +20,11 @@ public class Library<T extends LibraryItem> {
         }
     }
 
-    public ArrayList<T> getItems() {
+    ArrayList<T> getItems() {
         return items;
     }
 
-    public T getItem(String itemId) {
+    T getItem(String itemId) {
         for (T item : this.items) {
             if (item.getId().equals(itemId)) {
                 return item;
@@ -33,15 +33,15 @@ public class Library<T extends LibraryItem> {
         return null;
     }
 
-    public ArrayList<T> getAvailableItems() {
+    ArrayList<T> getAvailableItems() {
         return (ArrayList<T>) this.items.stream().filter(item -> item.isAvailable()).collect(Collectors.toList());
     }
 
-    public ArrayList<String> getHeaderStrings() {
+    ArrayList<String> getHeaderStrings() {
         return headers;
     }
 
-    public String getItemDescription() {
+    String getItemDescription() {
         return itemDescription;
     }
 }

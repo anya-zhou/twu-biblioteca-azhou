@@ -9,7 +9,7 @@ public class User {
     private final String INVALID_USERNAME_MESSAGE = "Library ID must be in the format of xxx-xxxx, "
                                                         + "where each 'x' is a numerical digit";
 
-    public User(String username, String password, String name, String email, String phone)
+    User(String username, String password, String name, String email, String phone)
             throws IllegalArgumentException{
         if (isValidUsername(username)) {
             this.username = username;
@@ -22,28 +22,28 @@ public class User {
         }
     }
 
-    public static boolean isValidUsername(String username) {
+    private static boolean isValidUsername(String username) {
         return username.matches("\\d\\d\\d-\\d\\d\\d\\d");
     }
 
-    public String getUsername() {
+    String getUsername() {
         return username;
     }
 
     // Gross simplification, plain text password is obviously NOT a good idea...
-    public String getPassword() {
-        return password;
+    protected boolean passwordIsMatching(String password) {
+        return password.equals(this.password);
     }
 
-    public String getName() {
+    String getName() {
         return name;
     }
 
-    public String getEmail() {
+    String getEmail() {
         return email;
     }
 
-    public String getPhone() {
+    String getPhone() {
         return phone;
     }
 

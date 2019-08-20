@@ -1,9 +1,8 @@
 package com.twu.biblioteca;
 
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 
-public class Movie extends LibraryItem {
+class Movie extends LibraryItem {
     private static final String NO_RATING = "unrated";
     private String name;
     private String yearReleased;
@@ -20,20 +19,20 @@ public class Movie extends LibraryItem {
         }
     };
 
-    public Movie(String id, String name, String yearReleased, String director) {
+    Movie(String id, String name, String yearReleased, String director) {
         this.id = id;
         this.name = name;
         this.yearReleased = yearReleased;
         this.director = director;
     }
 
-    public Movie(String id, String name, String yearReleased, String director, int rating){
+    Movie(String id, String name, String yearReleased, String director, int rating){
         this(id, name, yearReleased, director);
         this.setRating(rating);
     }
 
 
-    public void setRating(int rating) {
+    private void setRating(int rating) {
         if (rating >= 1 && rating <= 10) {
             this.rating = new Integer(rating);
         } else {
@@ -42,12 +41,12 @@ public class Movie extends LibraryItem {
     }
 
     @Override
-    public ArrayList<String> getPrintableHeaders() {
+    ArrayList<String> getPrintableHeaders() {
         return headerFields;
     }
 
     @Override
-    public ArrayList<String> getPrintableFieldStrings() {
+    ArrayList<String> getPrintableFieldStrings() {
         ArrayList<String> fieldStrings = new ArrayList<>();
         fieldStrings.add(this.getId());
         fieldStrings.add(this.getName());
@@ -58,23 +57,23 @@ public class Movie extends LibraryItem {
     }
 
     @Override
-    public String getDescription() {
+    String getDescription() {
         return "movie";
     }
 
-    public String getName() {
+    String getName() {
         return name;
     }
 
-    public String getYearReleased() {
+    String getYearReleased() {
         return yearReleased;
     }
 
-    public String getDirector() {
+    String getDirector() {
         return director;
     }
 
-    public Integer getRating() {
+    Integer getRating() {
         return rating;
     }
 }

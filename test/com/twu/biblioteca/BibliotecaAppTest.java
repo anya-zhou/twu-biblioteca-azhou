@@ -57,7 +57,7 @@ public class BibliotecaAppTest {
         testUser1 = sampleData.getUsers().get(0);
         testUser2 = sampleData.getUsers().get(1);
         userId = testUser1.getUsername();
-        password = testUser1.getPassword();
+        password = "password";
         bibliotecaApp = new BibliotecaApp(
             sampleData.getBookLibrary(), sampleData.getMovieLibrary(),
             mockOut, mockReader, loginService
@@ -403,11 +403,14 @@ public class BibliotecaAppTest {
     }
 
     @Test
-    public void testSelectListMovieMenuOption() {
+    public void testSelectListMovieMenuOption() throws IOException {
         ArrayList<Movie> testMovies = sampleData.getMovieLibrary().getItems();
+        exit.expectSystemExit();
 
         // When
-        spyApp.executeLoggedInOption(BibliotecaApp.POST_LOGIN_LIST_MOVIES_KEY);
+        when(mockReader.readLine()).thenReturn(BibliotecaApp.POST_LOGIN_LIST_MOVIES_KEY)
+            .thenReturn(BibliotecaApp.POST_LOGIN_EXIT_APP_KEY);
+        spyApp.start();
 
         // Then
         int numColumns = sampleData.getMovieLibrary().getHeaderStrings().size();
